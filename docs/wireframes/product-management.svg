@@ -1,0 +1,92 @@
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8f9fa"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="1200" height="60" fill="#343a40"/>
+  <text x="30" y="38" font-family="Arial" font-size="20" fill="white">QIO COFFEE - Manajemen Produk</text>
+  
+  <!-- Navigation -->
+  <text x="800" y="38" font-family="Arial" font-size="16" fill="white">Dashboard</text>
+  <text x="900" y="38" font-family="Arial" font-size="16" fill="white">Produk</text>
+  <text x="980" y="38" font-family="Arial" font-size="16" fill="white">Laporan</text>
+  <text x="1070" y="38" font-family="Arial" font-size="16" fill="white">Logout</text>
+  
+  <!-- Main Content Area -->
+  <rect x="0" y="60" width="1200" height="740" fill="#f8f9fa"/>
+  
+  <!-- Page Title and Add Button -->
+  <text x="50" y="100" font-family="Arial" font-size="24" fill="#212529">Manajemen Produk</text>
+  <rect x="1000" y="80" width="150" height="40" fill="#28a745" rx="5"/>
+  <text x="1075" y="105" font-family="Arial" font-size="16" fill="white" text-anchor="middle">+ Tambah Produk</text>
+  
+  <!-- Search and Filter -->
+  <rect x="50" y="130" width="300" height="40" fill="white" stroke="#ced4da" stroke-width="1" rx="5"/>
+  <text x="70" y="155" font-family="Arial" font-size="14" fill="#6c757d">Cari produk...</text>
+  
+  <!-- Product Table -->
+  <rect x="50" y="190" width="1100" height="550" fill="white" rx="5" stroke="#dee2e6" stroke-width="1"/>
+  
+  <!-- Table Header -->
+  <rect x="50" y="190" width="1100" height="50" fill="#f8f9fa" rx="5 5 0 0"/>
+  <line x1="50" y1="240" x2="1150" y2="240" stroke="#dee2e6" stroke-width="1"/>
+  
+  <text x="80" y="220" font-family="Arial" font-size="14" font-weight="bold" fill="#212529">ID</text>
+  <text x="180" y="220" font-family="Arial" font-size="14" font-weight="bold" fill="#212529">Gambar</text>
+  <text x="350" y="220" font-family="Arial" font-size="14" font-weight="bold" fill="#212529">Nama Produk</text>
+  <text x="650" y="220" font-family="Arial" font-size="14" font-weight="bold" fill="#212529">Deskripsi</text>
+  <text x="850" y="220" font-family="Arial" font-size="14" font-weight="bold" fill="#212529">Harga</text>
+  <text x="950" y="220" font-family="Arial" font-size="14" font-weight="bold" fill="#212529">Stok</text>
+  <text x="1050" y="220" font-family="Arial" font-size="14" font-weight="bold" fill="#212529">Aksi</text>
+  
+  <!-- Table Rows -->
+  <!-- Row 1 -->
+  <line x1="50" y1="290" x2="1150" y2="290" stroke="#dee2e6" stroke-width="1"/>
+  <text x="80" y="270" font-family="Arial" font-size="14" fill="#212529">1</text>
+  <rect x="180" y="250" width="40" height="30" fill="#dee2e6" rx="3"/>
+  <text x="350" y="270" font-family="Arial" font-size="14" fill="#212529">Espresso</text>
+  <text x="650" y="270" font-family="Arial" font-size="14" fill="#212529">Kopi hitam pekat</text>
+  <text x="850" y="270" font-family="Arial" font-size="14" fill="#212529">Rp 20.000</text>
+  <text x="950" y="270" font-family="Arial" font-size="14" fill="#212529">50</text>
+  <rect x="1050" y="255" width="30" height="25" fill="#ffc107" rx="3"/>
+  <text x="1065" y="270" font-family="Arial" font-size="12" fill="white" text-anchor="middle">Edit</text>
+  <rect x="1090" y="255" width="40" height="25" fill="#dc3545" rx="3"/>
+  <text x="1110" y="270" font-family="Arial" font-size="12" fill="white" text-anchor="middle">Hapus</text>
+  
+  <!-- Row 2 -->
+  <line x1="50" y1="340" x2="1150" y2="340" stroke="#dee2e6" stroke-width="1"/>
+  <text x="80" y="320" font-family="Arial" font-size="14" fill="#212529">2</text>
+  <rect x="180" y="300" width="40" height="30" fill="#dee2e6" rx="3"/>
+  <text x="350" y="320" font-family="Arial" font-size="14" fill="#212529">Cappuccino</text>
+  <text x="650" y="320" font-family="Arial" font-size="14" fill="#212529">Espresso dengan susu dan foam</text>
+  <text x="850" y="320" font-family="Arial" font-size="14" fill="#212529">Rp 25.000</text>
+  <text x="950" y="320" font-family="Arial" font-size="14" fill="#212529">45</text>
+  <rect x="1050" y="305" width="30" height="25" fill="#ffc107" rx="3"/>
+  <text x="1065" y="320" font-family="Arial" font-size="12" fill="white" text-anchor="middle">Edit</text>
+  <rect x="1090" y="305" width="40" height="25" fill="#dc3545" rx="3"/>
+  <text x="1110" y="320" font-family="Arial" font-size="12" fill="white" text-anchor="middle">Hapus</text>
+  
+  <!-- Row 3 -->
+  <line x1="50" y1="390" x2="1150" y2="390" stroke="#dee2e6" stroke-width="1"/>
+  <text x="80" y="370" font-family="Arial" font-size="14" fill="#212529">3</text>
+  <rect x="180" y="350" width="40" height="30" fill="#dee2e6" rx="3"/>
+  <text x="350" y="370" font-family="Arial" font-size="14" fill="#212529">Latte</text>
+  <text x="650" y="370" font-family="Arial" font-size="14" fill="#212529">Espresso dengan susu steamed</text>
+  <text x="850" y="370" font-family="Arial" font-size="14" fill="#212529">Rp 28.000</text>
+  <text x="950" y="370" font-family="Arial" font-size="14" fill="#212529">40</text>
+  <rect x="1050" y="355" width="30" height="25" fill="#ffc107" rx="3"/>
+  <text x="1065" y="370" font-family="Arial" font-size="12" fill="white" text-anchor="middle">Edit</text>
+  <rect x="1090" y="355" width="40" height="25" fill="#dc3545" rx="3"/>
+  <text x="1110" y="370" font-family="Arial" font-size="12" fill="white" text-anchor="middle">Hapus</text>
+  
+  <!-- Pagination -->
+  <rect x="500" y="760" width="200" height="30" fill="#f8f9fa"/>
+  <rect x="530" y="760" width="30" height="30" fill="#007bff" rx="3"/>
+  <text x="545" y="780" font-family="Arial" font-size="14" fill="white" text-anchor="middle">1</text>
+  <rect x="570" y="760" width="30" height="30" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="3"/>
+  <text x="585" y="780" font-family="Arial" font-size="14" fill="#212529" text-anchor="middle">2</text>
+  <rect x="610" y="760" width="30" height="30" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="3"/>
+  <text x="625" y="780" font-family="Arial" font-size="14" fill="#212529" text-anchor="middle">3</text>
+  <rect x="650" y="760" width="30" height="30" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="3"/>
+  <text x="665" y="780" font-family="Arial" font-size="14" fill="#212529" text-anchor="middle">></text>
+</svg>
