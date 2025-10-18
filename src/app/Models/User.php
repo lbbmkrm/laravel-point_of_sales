@@ -19,8 +19,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
+        'username',
+        'phone',
         'password',
+        'role',
     ];
 
     /**
@@ -41,8 +43,28 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => 'string',
         ];
+    }
+
+    /**
+     * Check if user is owner
+     * 
+     * @return bool
+     */
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
+    }
+
+    /**
+     * Check if user is cashier
+     * 
+     * @return bool
+     */
+    public function isCashier(): bool
+    {
+        return $this->role === 'cashier';
     }
 }
