@@ -13,18 +13,20 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::created([
+        User::create([
             'name' => 'Admin QIO Coffee',
             'username' => 'admin',
             'password' => bcrypt('password123'),
-            'role' => 'owner'
+            'phone' => '08123456789',
+            'role' => 'owner',
         ]);
 
-        User::created([
+        User::create([
             'name' => 'Cashier QIO Coffee',
             'username' => 'cashier',
             'password' => bcrypt('password123'),
-            'role' => 'cashier'
+            'phone' => '08123456789',
+            'role' => 'cashier',
         ]);
     }
 }

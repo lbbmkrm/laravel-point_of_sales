@@ -14,4 +14,5 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Volt::route('/', 'dashboard.home')->name('dashboard');
+    Volt::route('/products', 'dashboard.product')->name('products');
 });

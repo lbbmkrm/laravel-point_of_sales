@@ -4,13 +4,15 @@ use App\Livewire\Forms\RegisterForm;
 use App\Services\AuthService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
+use Livewire\Attributes\{Layout, Title};
+
 
 
 new
 #[Layout('layouts.guest')]
+#[Title('Register')]
 class extends Component
 {
-    public static string $title = 'Register';
 
     public RegisterForm $form;
 

@@ -1,9 +1,9 @@
 <?php
 
 use Livewire\Volt\Component;
-use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\{Layout, Title};
 
 new
 #[Layout('layouts.guest')]

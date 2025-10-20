@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Hash;
+use Exception;
 
 class UserRepository
 {
@@ -16,13 +17,16 @@ class UserRepository
      */
     public function create(array $data): User
     {
-        return User::create([
-            'name' => $data['name'],
-            'username' => $data['username'],
-            'phone' => $data['phone'],
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'] ?? 'cashier',
-        ]);
+        try {
+            return User::create([
+                'name' => $data['name'],
+                'username' => $data['username'],
+                'phone' => $data['phone'],
+                'password' => Hash::make($data['password']),
+            ]);
+        } catch (Exception $e) {
+            throw new Exception('Failed to create user', 500);
+        }
     }
     public function findById(int $id): ?User
     {
