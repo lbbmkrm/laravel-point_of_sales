@@ -5,10 +5,12 @@ use App\Services\AuthService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
 
-new class extends Component
+
+new
+#[Layout('layouts.guest')]
+class extends Component
 {
     public static string $title = 'Register';
-    protected string $layout = 'layouts.guest';
 
     public RegisterForm $form;
 

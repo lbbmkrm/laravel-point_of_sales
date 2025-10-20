@@ -1,13 +1,16 @@
 <?php
 
 use Livewire\Volt\Component;
+use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-new class extends Component
+new
+#[Layout('layouts.guest')]
+#[Title('Login')]
+class extends Component
 {
     public static string $title = 'Login';
-    protected string $layout = 'layouts.guest';
 
     public string $username = '';
     public string $password = '';
@@ -36,7 +39,6 @@ new class extends Component
         $this->redirect('/', navigate: true);
     }
 };
-
 ?>
 
 <div class="min-h-screen flex items-center justify-center bg-gray-100">
