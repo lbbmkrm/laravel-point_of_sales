@@ -114,7 +114,6 @@ class extends Component {
         }
 
         try {
-            // Simpan nilai sementara untuk modal sukses (jika perlu tampil di sana)
             $finalTotal = $this->total();
             $finalPaymentAmount = $this->paymentAmount;
             $finalChange = $this->change;
@@ -130,14 +129,10 @@ class extends Component {
                 ])->toArray(),
             ]); 
             
-            // Reset state sepenuhnya (hilangkan override!)
             $this->reset(['cart', 'paymentAmount', 'change', 'showCheckout']);
             
-            // Buka modal sukses
             $this->showSuccess = true;
 
-            // Jika butuh tampil nilai di modal sukses, gunakan temporary properties baru
-            // Misal: public ?float $successTotal = null; dll.
             $this->successTotal = $finalTotal;
             $this->successPayment = $finalPaymentAmount;
             $this->successChange = $finalChange;

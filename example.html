@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Street Coffee - POS Kasir</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="flex h-screen overflow-hidden">
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Content Area -->
+        <div class="flex-1 flex flex-col overflow-hidden md:flex-row">
+          <!-- Menu Section -->
+          <div class="flex-1 p-4 overflow-y-auto md:p-6">
+            <!-- Category Tabs -->
+            <div class="flex gap-2 mb-4 overflow-x-auto md:mb-6">
+              <button
+                onclick="filterCategory('all')"
+                class="category-btn px-4 py-2 rounded-lg bg-amber-600 text-white font-medium whitespace-nowrap text-sm md:px-6"
+              >
+                Semua
+              </button>
+              <button
+                onclick="filterCategory('coffee')"
+                class="category-btn px-4 py-2 rounded-lg bg-white text-gray-700 font-medium whitespace-nowrap hover:bg-gray-50 text-sm md:px-6"
+              >
+                Kopi
+              </button>
+              <button
+                onclick="filterCategory('noncoffee')"
+                class="category-btn px-4 py-2 rounded-lg bg-white text-gray-700 font-medium whitespace-nowrap hover:bg-gray-50 text-sm md:px-6"
+              >
+                Non-Kopi
+              </button>
+              <button
+                onclick="filterCategory('snack')"
+                class="category-btn px-4 py-2 rounded-lg bg-white text-gray-700 font-medium whitespace-nowrap hover:bg-gray-50 text-sm md:px-6"
+              >
+                Makanan
+              </button>
+            </div>
+
+            <!-- Menu Grid -->
+            <div
+              class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            >
+              <!-- Coffee Items -->
+              <div
+                class="menu-item coffee bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Espresso', 18000)"
+              >
+                <div
+                  class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">☕</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Espresso
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 18.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item coffee bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Americano', 20000)"
+              >
+                <div
+                  class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">☕</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Americano
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 20.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item coffee bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Cappuccino', 25000)"
+              >
+                <div
+                  class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">☕</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Cappuccino
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 25.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item coffee bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Latte', 26000)"
+              >
+                <div
+                  class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">☕</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Latte
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 26.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item coffee bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Mocha', 28000)"
+              >
+                <div
+                  class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">☕</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Mocha
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 28.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item coffee bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Caramel Macchiato', 30000)"
+              >
+                <div
+                  class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">☕</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Caramel Macchiato
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 30.000
+                </p>
+              </div>
+
+              <!-- Non-Coffee Items -->
+              <div
+                class="menu-item noncoffee bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Chocolate', 22000)"
+              >
+                <div
+                  class="bg-red-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">🍫</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Chocolate
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 22.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item noncoffee bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Matcha Latte', 27000)"
+              >
+                <div
+                  class="bg-green-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">🍵</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Matcha Latte
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 27.000
+                </p>
+              </div>
+
+              <!-- Snack Items -->
+              <div
+                class="menu-item snack bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Croissant', 15000)"
+              >
+                <div
+                  class="bg-yellow-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">🥐</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Croissant
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 15.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item snack bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Sandwich', 25000)"
+              >
+                <div
+                  class="bg-orange-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">🥪</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Sandwich
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 25.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item snack bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Cake', 18000)"
+              >
+                <div
+                  class="bg-pink-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">🍰</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Cake
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 18.000
+                </p>
+              </div>
+
+              <div
+                class="menu-item snack bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition md:p-4"
+                onclick="addToCart('Cookie', 12000)"
+              >
+                <div
+                  class="bg-yellow-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                >
+                  <span class="text-4xl md:text-5xl">🍪</span>
+                </div>
+                <h3
+                  class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                >
+                  Cookie
+                </h3>
+                <p class="text-amber-600 font-bold text-sm md:text-base">
+                  Rp 12.000
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cart Section -->
+          <div
+            class="w-full bg-white p-4 shadow-lg flex flex-col border-t md:w-96 md:p-6 md:border-l md:border-t-0"
+          >
+            <div class="mb-4 md:mb-6">
+              <h2 class="text-lg font-bold text-gray-800 mb-2 md:text-xl">
+                Pesanan Saat Ini
+              </h2>
+              <p class="text-sm text-gray-600">
+                Order #<span id="orderNumber">001</span>
+              </p>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto mb-4 md:mb-6" id="cartItems">
+              <p class="text-gray-400 text-center py-8">Belum ada pesanan</p>
+            </div>
+
+            <!-- Summary -->
+            <div class="border-t pt-4 space-y-3">
+              <div
+                class="flex justify-between text-gray-600 text-sm md:text-base"
+              >
+                <span>Subtotal</span>
+                <span id="subtotal">Rp 0</span>
+              </div>
+              <div
+                class="flex justify-between text-gray-600 text-sm md:text-base"
+              >
+                <span>Pajak (10%)</span>
+                <span id="tax">Rp 0</span>
+              </div>
+              <div
+                class="flex justify-between text-lg font-bold text-gray-800 border-t pt-3 md:text-xl"
+              >
+                <span>Total</span>
+                <span id="total">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3 mt-4 md:mt-6">
+              <button
+                onclick="clearCart()"
+                class="w-full py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition text-sm md:text-base"
+              >
+                Hapus Semua
+              </button>
+              <button
+                onclick="openCheckoutModal()"
+                class="w-full py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition text-sm md:text-base"
+              >
+                Bayar Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div
+      id="checkoutModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white rounded-2xl max-w-md w-full p-4 shadow-2xl md:p-6">
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h3 class="text-xl font-bold text-gray-800 md:text-2xl">
+            Konfirmasi Pembayaran
+          </h3>
+          <button
+            onclick="closeCheckoutModal()"
+            class="text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="space-y-4 mb-4 md:mb-6">
+          <div class="bg-amber-50 rounded-lg p-3 md:p-4">
+            <div class="flex justify-between mb-2 text-sm md:text-base">
+              <span class="text-gray-600">Subtotal:</span>
+              <span class="font-semibold" id="modalSubtotal">Rp 0</span>
+            </div>
+            <div class="flex justify-between mb-2 text-sm md:text-base">
+              <span class="text-gray-600">Pajak (10%):</span>
+              <span class="font-semibold" id="modalTax">Rp 0</span>
+            </div>
+            <div
+              class="flex justify-between text-lg font-bold text-amber-600 border-t border-amber-200 pt-2 mt-2 md:text-xl"
+            >
+              <span>Total Bayar:</span>
+              <span id="modalTotal">Rp 0</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Jumlah Uang Diterima</label
+            >
+            <input
+              type="number"
+              id="paymentAmount"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:outline-none text-lg"
+              placeholder="Masukkan jumlah uang"
+              oninput="calculateChange()"
+            />
+          </div>
+
+          <div
+            id="changeSection"
+            class="hidden bg-green-50 rounded-lg p-3 border-2 border-green-200 md:p-4"
+          >
+            <div class="flex justify-between items-center">
+              <span class="text-gray-700 font-semibold text-sm md:text-base"
+                >Kembalian:</span
+              >
+              <span
+                class="text-xl font-bold text-green-600 md:text-2xl"
+                id="changeAmount"
+                >Rp 0</span
+              >
+            </div>
+          </div>
+
+          <div
+            id="insufficientSection"
+            class="hidden bg-red-50 rounded-lg p-3 border-2 border-red-200 md:p-4"
+          >
+            <p
+              class="text-red-600 font-semibold text-center text-sm md:text-base"
+            >
+              Uang tidak cukup!
+            </p>
+          </div>
+
+          <!-- Quick Amount Buttons -->
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              onclick="setQuickAmount(50000)"
+              class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-xs md:px-4 md:text-sm"
+            >
+              50k
+            </button>
+            <button
+              onclick="setQuickAmount(100000)"
+              class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-xs md:px-4 md:text-sm"
+            >
+              100k
+            </button>
+            <button
+              onclick="setExactAmount()"
+              class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-xs md:px-4 md:text-sm"
+            >
+              Pas
+            </button>
+          </div>
+        </div>
+
+        <button
+          id="confirmPaymentBtn"
+          onclick="confirmPayment()"
+          disabled
+          class="w-full py-3 bg-gray-300 text-gray-500 rounded-lg font-semibold cursor-not-allowed transition"
+        >
+          Konfirmasi Pembayaran
+        </button>
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div
+      id="successModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
+      <div
+        class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl text-center md:p-8"
+      >
+        <div
+          class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 md:w-20 md:h-20"
+        >
+          <svg
+            class="w-8 h-8 text-green-500 md:w-10 md:h-10"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2 md:text-2xl">
+          Pembayaran Berhasil!
+        </h3>
+        <p class="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">
+          Transaksi telah berhasil diproses
+        </p>
+        <div class="bg-gray-50 rounded-lg p-3 mb-4 md:p-4 md:mb-6">
+          <div class="flex justify-between mb-2 text-sm md:text-base">
+            <span class="text-gray-600">Total:</span>
+            <span class="font-bold" id="successTotal">Rp 0</span>
+          </div>
+          <div class="flex justify-between mb-2 text-sm md:text-base">
+            <span class="text-gray-600">Dibayar:</span>
+            <span class="font-bold" id="successPaid">Rp 0</span>
+          </div>
+          <div
+            class="flex justify-between text-green-600 font-bold text-sm md:text-base"
+          >
+            <span>Kembalian:</span>
+            <span id="successChange">Rp 0</span>
+          </div>
+        </div>
+        <button
+          onclick="closeSuccessModal()"
+          class="w-full py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition text-sm md:text-base"
+        >
+          Selesai
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let cart = [];
+      let orderNum = 1;
+
+      // Initialize date
+      function updateDate() {
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        };
+        document.getElementById("currentDate").textContent =
+          new Date().toLocaleDateString("id-ID", options);
+      }
+      updateDate();
+
+      function addToCart(name, price) {
+        const existingItem = cart.find((item) => item.name === name);
+        if (existingItem) {
+          existingItem.quantity++;
+        } else {
+          cart.push({ name, price, quantity: 1 });
+        }
+        updateCart();
+      }
+
+      function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCart();
+      }
+
+      function updateQuantity(index, change) {
+        cart[index].quantity += change;
+        if (cart[index].quantity <= 0) {
+          removeFromCart(index);
+        } else {
+          updateCart();
+        }
+      }
+
+      function updateCart() {
+        const cartContainer = document.getElementById("cartItems");
+
+        if (cart.length === 0) {
+          cartContainer.innerHTML =
+            '<p class="text-gray-400 text-center py-8">Belum ada pesanan</p>';
+        } else {
+          cartContainer.innerHTML = cart
+            .map(
+              (item, index) => `
+                    <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-gray-800">${
+                              item.name
+                            }</h4>
+                            <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateQuantity(${index}, -1)" class="w-7 h-7 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center">-</button>
+                                <span class="w-8 text-center font-semibold">${
+                                  item.quantity
+                                }</span>
+                                <button onclick="updateQuantity(${index}, 1)" class="w-7 h-7 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center">+</button>
+                            </div>
+                            <span class="font-bold text-amber-600">Rp ${(
+                              item.price * item.quantity
+                            ).toLocaleString("id-ID")}</span>
+                        </div>
+                    </div>
+                `
+            )
+            .join("");
+        }
+
+        // Update summary
+        const subtotal = cart.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+        const tax = subtotal * 0.1;
+        const total = subtotal + tax;
+
+        document.getElementById(
+          "subtotal"
+        ).textContent = `Rp ${subtotal.toLocaleString("id-ID")}`;
+        document.getElementById("tax").textContent = `Rp ${tax.toLocaleString(
+          "id-ID"
+        )}`;
+        document.getElementById(
+          "total"
+        ).textContent = `Rp ${total.toLocaleString("id-ID")}`;
+      }
+
+      function clearCart() {
+        if (
+          cart.length > 0 &&
+          confirm("Yakin ingin menghapus semua pesanan?")
+        ) {
+          cart = [];
+          updateCart();
+        }
+      }
+
+      function openCheckoutModal() {
+        if (cart.length === 0) {
+          alert("Keranjang masih kosong!");
+          return;
+        }
+
+        const subtotal = cart.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+        const tax = subtotal * 0.1;
+        const total = subtotal + tax;
+
+        document.getElementById(
+          "modalSubtotal"
+        ).textContent = `Rp ${subtotal.toLocaleString("id-ID")}`;
+        document.getElementById(
+          "modalTax"
+        ).textContent = `Rp ${tax.toLocaleString("id-ID")}`;
+        document.getElementById(
+          "modalTotal"
+        ).textContent = `Rp ${total.toLocaleString("id-ID")}`;
+        document.getElementById("paymentAmount").value = "";
+        document.getElementById("changeSection").classList.add("hidden");
+        document.getElementById("insufficientSection").classList.add("hidden");
+        document.getElementById("confirmPaymentBtn").disabled = true;
+        document
+          .getElementById("confirmPaymentBtn")
+          .classList.add("bg-gray-300", "text-gray-500", "cursor-not-allowed");
+        document
+          .getElementById("confirmPaymentBtn")
+          .classList.remove(
+            "bg-green-500",
+            "text-white",
+            "hover:bg-green-600",
+            "cursor-pointer"
+          );
+
+        document.getElementById("checkoutModal").classList.remove("hidden");
+      }
+
+      function closeCheckoutModal() {
+        document.getElementById("checkoutModal").classList.add("hidden");
+      }
+
+      function calculateChange() {
+        const subtotal = cart.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+        const total = subtotal * 1.1;
+        const paid =
+          parseFloat(document.getElementById("paymentAmount").value) || 0;
+        const change = paid - total;
+
+        const changeSection = document.getElementById("changeSection");
+        const insufficientSection = document.getElementById(
+          "insufficientSection"
+        );
+        const confirmBtn = document.getElementById("confirmPaymentBtn");
+
+        if (paid === 0) {
+          changeSection.classList.add("hidden");
+          insufficientSection.classList.add("hidden");
+          confirmBtn.disabled = true;
+          confirmBtn.classList.add(
+            "bg-gray-300",
+            "text-gray-500",
+            "cursor-not-allowed"
+          );
+          confirmBtn.classList.remove(
+            "bg-green-500",
+            "text-white",
+            "hover:bg-green-600",
+            "cursor-pointer"
+          );
+        } else if (change >= 0) {
+          changeSection.classList.remove("hidden");
+          insufficientSection.classList.add("hidden");
+          document.getElementById(
+            "changeAmount"
+          ).textContent = `Rp ${change.toLocaleString("id-ID")}`;
+          confirmBtn.disabled = false;
+          confirmBtn.classList.remove(
+            "bg-gray-300",
+            "text-gray-500",
+            "cursor-not-allowed"
+          );
+          confirmBtn.classList.add(
+            "bg-green-500",
+            "text-white",
+            "hover:bg-green-600",
+            "cursor-pointer"
+          );
+        } else {
+          changeSection.classList.add("hidden");
+          insufficientSection.classList.remove("hidden");
+          confirmBtn.disabled = true;
+          confirmBtn.classList.add(
+            "bg-gray-300",
+            "text-gray-500",
+            "cursor-not-allowed"
+          );
+          confirmBtn.classList.remove(
+            "bg-green-500",
+            "text-white",
+            "hover:bg-green-600",
+            "cursor-pointer"
+          );
+        }
+      }
+
+      function setQuickAmount(amount) {
+        document.getElementById("paymentAmount").value = amount;
+        calculateChange();
+      }
+
+      function setExactAmount() {
+        const subtotal = cart.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+        const total = subtotal * 1.1;
+        document.getElementById("paymentAmount").value = Math.ceil(total);
+        calculateChange();
+      }
+
+      function confirmPayment() {
+        const subtotal = cart.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+        const total = subtotal * 1.1;
+        const paid =
+          parseFloat(document.getElementById("paymentAmount").value) || 0;
+        const change = paid - total;
+
+        if (change >= 0) {
+          document.getElementById(
+            "successTotal"
+          ).textContent = `Rp ${total.toLocaleString("id-ID")}`;
+          document.getElementById(
+            "successPaid"
+          ).textContent = `Rp ${paid.toLocaleString("id-ID")}`;
+          document.getElementById(
+            "successChange"
+          ).textContent = `Rp ${change.toLocaleString("id-ID")}`;
+
+          closeCheckoutModal();
+          document.getElementById("successModal").classList.remove("hidden");
+
+          // Update order number and clear cart
+          orderNum++;
+          document.getElementById("orderNumber").textContent = orderNum
+            .toString()
+            .padStart(3, "0");
+          cart = [];
+          updateCart();
+        }
+      }
+
+      function closeSuccessModal() {
+        document.getElementById("successModal").classList.add("hidden");
+      }
+
+      function filterCategory(category) {
+        const menuItems = document.querySelectorAll(".menu-item");
+        const buttons = document.querySelectorAll(".category-btn");
+
+        // Reset button styles
+        buttons.forEach((btn) => {
+          btn.classList.remove("bg-amber-600", "text-white");
+          btn.classList.add("bg-white", "text-gray-700", "hover:bg-gray-50");
+        });
+
+        // Active button style
+        const activeBtn = document.querySelector(
+          `button[onclick="filterCategory('${category}')"]`
+        );
+        activeBtn.classList.add("bg-amber-600", "text-white");
+        activeBtn.classList.remove(
+          "bg-white",
+          "text-gray-700",
+          "hover:bg-gray-50"
+        );
+
+        // Filter items
+        menuItems.forEach((item) => {
+          if (category === "all" || item.classList.contains(category)) {
+            item.style.display = "block";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      }
+
+      // Initialize category to 'all'
+      filterCategory("all");
+    </script>
+  </body>
+</html>
