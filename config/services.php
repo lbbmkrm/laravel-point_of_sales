@@ -35,4 +35,6 @@ return [
         ],
     ],
 
+    'tax_rate' => env('CASHIER_TAX_RATE', 0),
+
 ];

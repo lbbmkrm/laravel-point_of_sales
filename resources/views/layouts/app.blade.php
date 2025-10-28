@@ -5,7 +5,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-    <title>{{ "Qio Coffee | " . $title ?? 'App' }}</title>
+    <title>{{ "Qio Coffee | " . ($title ?? 'App') }}</title>
     @vite('resources/css/app.css')
     @livewireStyles
 </head>

@@ -35,7 +35,13 @@ class extends Component {
     #[Computed]
     public function tax(): float
     {
-        return $this->subtotal() * 0.10;
+        return $this->subtotal() * config('services.tax_rate');
+    }
+
+    #[Computed]
+    public function taxRateLabel():string {
+        $rate = config('services.tax_rate') * 100;
+        return "PPN $rate%";
     }
 
     #[Computed]
@@ -84,24 +90,33 @@ class extends Component {
         $this->showCheckout = true;
     }
 
-    public function calculateChange(): void
-    {
-        if (!$this->paymentAmount) return;
-        
-        $this->change = (float) $this->paymentAmount - $this->total();
-        $this->resetErrorBag('paymentAmount');
+    public function closeAndResetModal():void {
+        $this->showCheckout = false;
+        $this->resetErrorBag();
+        $this->reset('paymentAmount', 'change');
+    }
+
+    public function updatedPaymentAmount($value):void {
+        if(is_numeric($value) && $value > 0) {
+            $this->change = (float) $value - $this->total();
+            $this->resetErrorBag('paymentAmount');
+        }else{
+            $this->reset('change');
+        }
     }
 
     public function setQuickAmount($amount): void
     {
         $this->paymentAmount = $amount;
-        $this->calculateChange();
+        $this->change = (float) $this->paymentAmount - $this->total();
+        $this->resetErrorBag('paymentAmount');
     }
 
     public function setExactAmount(): void
     {
         $this->paymentAmount = ceil($this->total());
-        $this->calculateChange();
+        $this->change = (float) $this->paymentAmount - $this->total();
+        $this->resetErrorBag('paymentAmount');
     }
 
    public function checkout(TransactionService $transactionService): void
@@ -169,7 +184,9 @@ class extends Component {
                         </div>
                         
                         <div class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3">
-                            <span class="text-4xl md:text-5xl">Coffee</span>
+                           <img src="{{ $product['image'] ?? asset('images/default-coffee-menu.jpg') }}"
+                8              alt="{{ $product['name'] }}"
+                9              class="w-full h-full object-cover rounded-lg">
                         </div>
                         <h3 class="font-semibold text-gray-800 mb-1 text-sm md:text-base">
                             {{ $product['name'] }}
@@ -230,7 +247,7 @@ class extends Component {
                     <span>Rp {{ number_format($this->subtotal, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between text-gray-600">
-                    <span>Pajak (10%)</span>
+                    <span>{{$this->taxRateLabel}}</span>
                     <span>Rp {{ number_format($this->tax, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between text-lg font-bold text-gray-800 border-t pt-3">
@@ -288,7 +305,7 @@ class extends Component {
                     Konfirmasi Pembayaran
                 </h3>
                 <button 
-                    wire:click="$set('showCheckout', false)" 
+                    wire:click="closeAndResetModal" 
                     aria-label="Tutup modal"
                     class="text-gray-400 cursor-pointer hover:text-gray-600 transition"
                 >
@@ -319,7 +336,7 @@ class extends Component {
                     <span class="font-semibold">Rp {{ number_format($this->subtotal, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between mb-2">
-                    <span class="text-gray-600">Pajak (10%):</span>
+                    <span class="text-gray-600">{{$this->taxRateLabel}}</span>
                     <span class="font-semibold">Rp {{ number_format($this->tax, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between text-lg font-bold text-amber-600 border-t border-amber-200 pt-2 mt-2">
@@ -335,8 +352,7 @@ class extends Component {
                 <input
                     id="paymentAmount"
                     type="number"
-                    wire:model.live="paymentAmount"
-                    wire:change="calculateChange"
+                    wire:model.live.debounce.1000ms="paymentAmount"
                     @class([
                         'w-full px-4 py-3 border-2 rounded-lg focus:outline-none text-lg transition',
                         'border-red-300 focus:border-red-500' => $errors->has('paymentAmount'),
