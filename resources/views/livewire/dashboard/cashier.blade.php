@@ -1,14 +1,14 @@
 <?php
 
 use Livewire\Volt\Component;
-use Livewire\Attributes\{Layout, Title, Computed, Validate};
+use Livewire\Attributes\{Layout, Title, Computed, Validate, Url};
 use App\Services\{ProductService, TransactionService};
+use App\Models\Product;
 
 new
 #[Layout('layouts.app')]
 #[Title('Cashier')]
 class extends Component {
-    public array $products = [];
     public array $cart = [];
     public bool $showCheckout = false;
     public bool $showSuccess = false;
@@ -21,11 +21,15 @@ class extends Component {
     public ?float $successPayment = null;
     public ?float $successChange = null;
 
-    public function mount(ProductService $productService): void 
-    {
-        $this->products = $productService->getAllProducts()->toArray();
-    }
+    #[Url(as: 'q', keep: true)]
+    public string $search = '';
 
+    
+    #[Computed]
+    public function products() {
+        return Product::where('name', 'like', "%$this->search%")->orderBy('name', 'asc')->get();
+    }
+    
     #[Computed]
     public function subtotal(): float
     {
@@ -166,16 +170,37 @@ class extends Component {
     <div class="flex flex-col overflow-hidden md:flex-row">
         <!-- Menu Section -->
         <div class="md:w-[70%] flex-1 p-4 overflow-y-auto md:p-6">
+            {{-- Search Bar --}}
+            <div class="relative mb-4 md:mb-6">
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari nama produk..."
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500 transition pr-10"
+                />
+
+                @if ($search)
+                    <button
+                        wire:click="$set('search', '')"
+                        aria-label="Clear search"
+                        class="absolute top-0 right-0 h-full px-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                @endif
+            </div>
             <!-- Menu Grid -->
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                @foreach ($products as $product)
+                @forelse ($this->products as $product)
                     <div
-                        wire:click="addToCart({{ $product['id'] }})"
+                        wire:click="addToCart({{ $product->id }})"
                         wire:loading.class="opacity-50 pointer-events-none"
-                        wire:target="addToCart({{ $product['id'] }})"
+                        wire:target="addToCart({{ $product->id }})"
                         class="menu-item bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition-all duration-200 md:p-4 relative"
                     >
-                        <div wire:loading wire:target="addToCart({{ $product['id'] }})" 
+                        <div wire:loading.flex wire:target="addToCart({{ $product->id }})" 
                              class="absolute inset-0 flex items-center justify-center bg-white/80 rounded-xl z-10">
                             <svg class="animate-spin h-6 w-6 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -184,18 +209,26 @@ class extends Component {
                         </div>
                         
                         <div class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3">
-                           <img src="{{ $product['image'] ?? asset('images/default-coffee-menu.jpg') }}"
-                8              alt="{{ $product['name'] }}"
+                           <img src="{{ $product->image ?? asset('images/default-coffee-menu.jpg') }}"
+                8              alt="{{ $product->name }}"
                 9              class="w-full h-full object-cover rounded-lg">
                         </div>
                         <h3 class="font-semibold text-gray-800 mb-1 text-sm md:text-base">
-                            {{ $product['name'] }}
+                            {{ $product->name }}
                         </h3>
                         <p class="text-amber-600 font-bold text-sm md:text-base">
-                            Rp {{ number_format($product['price'], 0, ',', '.') }}
+                            Rp {{ number_format($product->price, 0, ',', '.') }}
                         </p>
                     </div>
-                @endforeach
+                @empty
+                    <div class="col-span-full text-center py-12">
+                        <div class="flex flex-col items-center justify-center text-gray-500">
+                            <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <h3 class="text-xl font-semibold text-gray-700">Produk tidak ditemukan</h3>
+                            <p class="mt-1">Coba gunakan kata kunci lain untuk pencarian Anda.</p>
+                        </div>
+                    </div>
+                @endforelse
             </div>
         </div>
 

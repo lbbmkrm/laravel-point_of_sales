@@ -36,7 +36,7 @@ class extends Component
 
         session()->regenerate();
 
-        $this->redirect('/', navigate: true);
+        $this->redirect('/dashboard', navigate: true);
     }
 };
 ?>

@@ -21,7 +21,7 @@ new class extends Component {
         Auth::logout();
         session()->invalidate();
         session()->regenerateToken();
-        $this->redirect('/', navigate: true);
+        $this->redirect('/login', navigate: true);
     }
 }; ?>
 
