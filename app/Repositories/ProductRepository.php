@@ -14,12 +14,20 @@ class ProductRepository
     {
         $this->model = $product;
     }
-    public function getAll(): Collection
+    public function getAll(string $category = null): Collection
     {
         try {
-            return $this->model->all();
+            $query = $this->model->with("category");
+
+            if ($category) {
+                $query->whereHas('category', function ($q) use ($category) {
+                    $q->where('name', $category);
+                });
+            }
+
+            return $query->orderBy('name', 'asc')->get();
         } catch (Exception $e) {
-            throw new Exception('Failed to get products', 500);
+            throw new Exception("Failed to get products", 500);
         }
     }
 
@@ -28,7 +36,7 @@ class ProductRepository
         try {
             return $this->model->create($data);
         } catch (Exception $e) {
-            throw new Exception('Failed to create product', 500);
+            throw new Exception("Failed to create product", 500);
         }
     }
 
@@ -37,7 +45,7 @@ class ProductRepository
         try {
             return $product->update($data);
         } catch (Exception $e) {
-            throw new Exception('Failed to update product', 500);
+            throw new Exception("Failed to update product", 500);
         }
     }
 
@@ -46,7 +54,7 @@ class ProductRepository
         try {
             return $product->delete();
         } catch (Exception $e) {
-            throw new Exception('Failed to delete product', 500);
+            throw new Exception("Failed to delete product", 500);
         }
     }
 }

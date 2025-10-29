@@ -2,7 +2,9 @@
 
 use App\Livewire\Forms\ProductForm;
 use App\Models\Product;
+use App\Models\Category;
 use App\Services\ProductService;
+use App\Services\CategoryService;
 use Livewire\Volt\Component;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Title;
@@ -14,19 +16,16 @@ class extends Component
     public ProductForm $form;
 
     public Collection $products;
+    public Collection $categories;
 
     public bool $showModal = false;
     public bool $isEditMode = false;
     public ?Product $productToDelete = null;
 
-    public function mount(ProductService $productService): void
-    {
-        $this->getProducts($productService);
-    }
-
-    public function getProducts(ProductService $productService): void
+    public function mount(ProductService $productService, CategoryService $categoryService): void
     {
         $this->products = $productService->getAllProducts();
+        $this->categories = $categoryService->getAllCategories();
     }
 
     public function save(ProductService $productService): void
@@ -40,7 +39,7 @@ class extends Component
         }
 
         $this->closeModal();
-        $this->getProducts($productService);
+        $this->products = $productService->getAllProducts();
     }
 
     public function openModal(): void
@@ -78,7 +77,7 @@ class extends Component
         if ($this->productToDelete) {
             $productService->deleteProduct($this->productToDelete);
             $this->productToDelete = null;
-            $this->getProducts($productService);
+            $this->products = $productService->getAllProducts();
         }
     }
 };
@@ -108,6 +107,7 @@ class extends Component
                     <thead>
                         <tr class="bg-gray-100 border-b border-gray-200">
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Produk</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Kategori</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Deskripsi</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Harga</th>
                             <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Aksi</th>
@@ -119,19 +119,14 @@ class extends Component
                             <tr wire:key="{{ $product->id }}" class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        @if ($product->image)
-                                            <img class="w-12 h-12 rounded-lg object-cover ring-2 ring-gray-200" src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"/>
-                                        @else
-                                            <div class="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center ring-2 ring-gray-200">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                        @endif
+                                        <img src="{{ $product->image ?? asset('images/default-coffee-menu.jpg') }}" alt="{{ $product->name }}" class="w-12 h-12 object-cover rounded-lg">
                                         <div class="ml-4">
                                             <p class="text-sm font-semibold text-gray-800">{{ $product->name }}</p>
                                         </div>
                                     </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm text-gray-600">{{ $product->category->name }}</span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <p class="text-sm text-gray-600 max-w-xs">{{ Str::limit($product->description, 80) }}</p>
@@ -184,6 +179,16 @@ class extends Component
                         <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                         <textarea wire:model="form.description" id="description" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
                         @error('form.description') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                        <select wire:model="form.category_id" id="category" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('form.category_id') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="mb-4">

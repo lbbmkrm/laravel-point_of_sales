@@ -15,9 +15,9 @@ class ProductService
         $this->productRepository = $productRepository;
     }
 
-    public function getAllProducts(): Collection
+    public function getAllProducts(string $category = null): Collection
     {
-        return $this->productRepository->getAll();
+        return $this->productRepository->getAll($category);
     }
 
     public function createNewProduct(array $data): Product

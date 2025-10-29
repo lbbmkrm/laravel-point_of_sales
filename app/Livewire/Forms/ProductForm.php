@@ -13,6 +13,7 @@ class ProductForm extends Form
     public string $description = '';
     public string $price = '';
     public ?string $image = null;
+    public int $category_id = 1; // Default to 1, adjust as needed
 
     public function setProduct(Product $product): void
     {
@@ -21,6 +22,7 @@ class ProductForm extends Form
         $this->description = $product->description;
         $this->price = $product->price;
         $this->image = $product->image;
+        $this->category_id = $product->category_id;
     }
 
     public function rules(): array
@@ -29,21 +31,8 @@ class ProductForm extends Form
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|string', // Later, this could be 'image|max:1024' for file uploads
+            'image' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id'
         ];
-    }
-
-    public function store(): void
-    {
-        $this->validate();
-
-        Product::create($this->all());
-    }
-
-    public function update(): void
-    {
-        $this->validate();
-
-        $this->product->update($this->all());
     }
 }

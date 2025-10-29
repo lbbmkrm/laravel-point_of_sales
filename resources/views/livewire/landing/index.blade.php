@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Product;
+use App\Models\Category;
 use App\Services\ProductService;
+use App\Services\CategoryService;
 use Livewire\Volt\Component;
 use Livewire\Attributes\{Layout};
 use Illuminate\Database\Eloquent\Collection;
@@ -10,21 +12,30 @@ new
 #[Layout('layouts.landing')]
 class extends Component {
     public Collection $products;
+    public Collection $categories;
+    public ?string $selectedCategory = null;
 
-    public function mount(ProductService $productService): void
+    public function mount(ProductService $productService, CategoryService $categoryService): void
     {
         $this->products = $productService->getAllProducts();
+        $this->categories = $categoryService->getAllCategories();
+    }
+
+    public function filterByCategory(ProductService $productService, ?string $categoryName = null): void
+    {
+        $this->selectedCategory = $categoryName;
+        $this->products = $productService->getAllProducts($this->selectedCategory);
     }
 }; ?>
 
 <div class="min-h-screen  font-Montserrat text-primary-text">
-    
+
     <!-- Navigation Header -->
-    <nav x-data="{ 
-        isOpen: false, 
+    <nav x-data="{
+        isOpen: false,
         scrolled: false,
         activeSection: 'home'
-    }" 
+    }"
     @scroll.window="scrolled = (window.pageYOffset > 50)"
     :class="{ 'bg-stone-900/40 backdrop-blur-md shadow-lg': scrolled, 'bg-transparent': !scrolled }"
     class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
@@ -48,7 +59,7 @@ class extends Component {
 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-1">
-                   
+
                     <a href="#about" class="px-4 py-2 text-white hover:text-amber-500 transition-colors duration-200 font-medium relative group">
                         Tentang
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-500 group-hover:w-full transition-all duration-300"></span>
@@ -86,7 +97,7 @@ class extends Component {
         </div>
 
         <!-- Mobile Menu -->
-        <div x-show="isOpen" 
+        <div x-show="isOpen"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 transform scale-95"
              x-transition:enter-end="opacity-100 transform scale-100"
@@ -95,7 +106,7 @@ class extends Component {
              x-transition:leave-end="opacity-0 transform scale-95"
              class="md:hidden bg-stone-900/98 backdrop-blur-lg border-t border-gray-800">
             <div class="px-4 pt-4 pb-6 space-y-2">
-               
+
                 <a href="#about" @click="isOpen = false" class="block px-4 py-3 text-white hover:text-amber-500 hover:bg-white/5 rounded-lg transition-all duration-200 font-medium">
                     Tentang
                 </a>
@@ -120,7 +131,7 @@ class extends Component {
             <div class="absolute inset-0 z-0">
                 <!-- Dark Overlay -->
                 <div class="absolute inset-0 bg-black/60 z-10"></div>
-                
+
                 <!-- Single Background Image -->
                 <img x-ref="heroImage" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1920" alt="Secangkir kopi sebagai latar belakang" class="w-full h-full object-cover transition-transform duration-75 ease-out" style="transform: scale(1.2);">
             </div>
@@ -133,13 +144,13 @@ class extends Component {
                     </h1>
                     <div class="w-24 h-1 bg-amber-500 mx-auto mb-8"></div>
                 </div>
-                
+
                 <p class="text-xl md:text-2xl text-gray-200 mb-4 font-light">
                     to Our Street Coffee
                 </p>
-                
+
                 <p class="text-base md:text-lg text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
-                    Nikmati pengalaman kopi jalanan terbaik dengan cita rasa autentik yang memanjakan setiap tegukan. 
+                    Nikmati pengalaman kopi jalanan terbaik dengan cita rasa autentik yang memanjakan setiap tegukan.
                     Tempat di mana aroma kopi bertemu dengan kehangatan suasana kota.
                 </p>
 
@@ -168,14 +179,14 @@ class extends Component {
                     <div class="w-24 h-1 bg-amber-500 mx-auto mb-8"></div>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">Kisah kami dimulai dari kecintaan terhadap kopi dan hasrat untuk berbagi pengalaman kopi terbaik.</p>
                 </div>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <div class="relative">
                         <div class="absolute -top-4 -left-4 w-full h-full border-2 border-amber-500 z-0"></div>
                         <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600" alt="Coffee shop" class="w-full h-auto object-cover relative z-10 shadow-xl">
                         <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-amber-500 z-0 hidden md:block"></div>
                     </div>
-                    
+
                     <div class="space-y-6">
                         <h3 class="text-2xl font-semibold text-gray-800">Perjalanan Kopi Kami</h3>
                         <p class="text-gray-600 leading-relaxed">
@@ -184,7 +195,7 @@ class extends Component {
                         <p class="text-gray-600 leading-relaxed">
                             Kami memilih biji kopi terbaik dari petani lokal dan internasional, menyangrai dengan hati-hati untuk menghasilkan profil rasa yang sempurna, dan menyajikannya dengan keahlian barista kami yang berpengalaman.
                         </p>
-                        
+
                         <div class="grid grid-cols-2 gap-4 mt-8">
                             <div class="text-center p-4 border border-gray-200 rounded-lg hover:border-amber-500 transition-all">
                                 <div class="text-amber-600 mb-2">
@@ -195,7 +206,7 @@ class extends Component {
                                 <h4 class="font-semibold">Barista Ahli</h4>
                                 <p class="text-sm text-gray-500">Tim kami terdiri dari barista berpengalaman</p>
                             </div>
-                            
+
                             <div class="text-center p-4 border border-gray-200 rounded-lg hover:border-amber-500 transition-all">
                                 <div class="text-amber-600 mb-2">
                                     <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -205,7 +216,7 @@ class extends Component {
                                 <h4 class="font-semibold">Kualitas Terbaik</h4>
                                 <p class="text-sm text-gray-500">Hanya biji kopi terbaik yang kami gunakan</p>
                             </div>
-                            
+
                             <div class="text-center p-4 border border-gray-200 rounded-lg hover:border-amber-500 transition-all">
                                 <div class="text-amber-600 mb-2">
                                     <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -215,7 +226,7 @@ class extends Component {
                                 <h4 class="font-semibold">Inovasi</h4>
                                 <p class="text-sm text-gray-500">Selalu berinovasi dengan menu baru</p>
                             </div>
-                            
+
                             <div class="text-center p-4 border border-gray-200 rounded-lg hover:border-amber-500 transition-all">
                                 <div class="text-amber-600 mb-2">
                                     <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -230,7 +241,7 @@ class extends Component {
                 </div>
             </div>
         </section>
-        
+
         <!-- Menu Section -->
         <section id="menu" class="py-20 px-8 bg-gray-100">
             <div class="max-w-6xl mx-auto">
@@ -239,28 +250,26 @@ class extends Component {
                     <div class="w-24 h-1 bg-amber-500 mx-auto mb-8"></div>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">Nikmati berbagai pilihan kopi dan makanan pendamping yang kami sajikan dengan cinta.</p>
                 </div>
-                
+
                 <!-- Menu Filter -->
-                <div class="flex flex-wrap justify-center gap-4 mb-12" x-data="{ activeTab: 'all' }">
-                    <button @click="activeTab = 'all'" :class="{ 'bg-amber-600 text-white': activeTab === 'all', 'bg-white text-gray-800 hover:bg-gray-200': activeTab !== 'all' }" class="px-6 py-2 rounded-full font-medium transition-all duration-200 shadow-sm">
+                <div class="flex flex-wrap justify-center gap-4 mb-12">
+                    <button wire:click="filterByCategory(null)"
+                            class="px-6 py-2 rounded-full font-medium transition-all duration-200 shadow-sm {{ is_null($selectedCategory) ? 'bg-amber-600 text-white' : 'bg-white text-gray-800 hover:bg-gray-200' }}">
                         Semua
                     </button>
-                    <button @click="activeTab = 'coffee'" :class="{ 'bg-amber-600 text-white': activeTab === 'coffee', 'bg-white text-gray-800 hover:bg-gray-200': activeTab !== 'coffee' }" class="px-6 py-2 rounded-full font-medium transition-all duration-200 shadow-sm">
-                        Kopi
-                    </button>
-                    <button @click="activeTab = 'noncoffee'" :class="{ 'bg-amber-600 text-white': activeTab === 'noncoffee', 'bg-white text-gray-800 hover:bg-gray-200': activeTab !== 'noncoffee' }" class="px-6 py-2 rounded-full font-medium transition-all duration-200 shadow-sm">
-                        Non-Kopi
-                    </button>
-                    <button @click="activeTab = 'food'" :class="{ 'bg-amber-600 text-white': activeTab === 'food', 'bg-white text-gray-800 hover:bg-gray-200': activeTab !== 'food' }" class="px-6 py-2 rounded-full font-medium transition-all duration-200 shadow-sm">
-                        Makanan
-                    </button>
+                    @foreach($categories as $category)
+                        <button wire:click="filterByCategory('{{ $category->name }}')"
+                                class="px-6 py-2 cursor-pointer rounded-full font-medium transition-all duration-200 shadow-sm {{ $selectedCategory == $category->name ? 'bg-amber-600 text-white' : 'bg-white text-gray-800 hover:bg-gray-200' }}">
+                            {{ $category->name }}
+                        </button>
+                    @endforeach
                 </div>
-                
+
                 <!-- Menu Items -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div wire:loading.class.delay="opacity-50 transition-opacity" wire:target="filterByCategory" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach ($products as $product)
                         <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
-                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='{{ asset('images/default-coffee-menu.jpg') }}';">
+                            <img src="{{ $product->image ?? asset('images/default-coffee-menu.jpg') }}" alt="{{ $product->name }}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='{{ asset('images/default-coffee-menu.jpg') }}';">
                             <div class="p-6">
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-xl font-semibold text-gray-800">{{ $product->name }}</h3>
@@ -271,7 +280,7 @@ class extends Component {
                         </div>
                     @endforeach
                 </div>
-                
+
                 <!-- View Full Menu Button -->
                 <div class="text-center mt-12">
                     <button class="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
@@ -289,7 +298,7 @@ class extends Component {
                     <div class="w-24 h-1 bg-amber-500 mx-auto mb-8"></div>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">Testimoni dari pelanggan setia yang telah merasakan pengalaman kopi terbaik di Qio Coffee.</p>
                 </div>
-                
+
                 <!-- Testimonials Carousel -->
                 <div x-data="{
                     currentSlide: 0,
@@ -356,11 +365,11 @@ class extends Component {
                     goToSlide(index) {
                         this.currentSlide = index;
                     }
-                }" 
-                @mouseenter="stopAutoplay()" 
+                }"
+                @mouseenter="stopAutoplay()"
                 @mouseleave="startAutoplay()"
                 class="relative">
-                    
+
                     <!-- Main Testimonial Card -->
                     <div class="relative overflow-hidden">
                         <template x-for="(testimonial, index) in testimonials" :key="index">
@@ -372,7 +381,7 @@ class extends Component {
                                  x-transition:leave-start="opacity-100 transform translate-x-0"
                                  x-transition:leave-end="opacity-0 transform -translate-x-full"
                                  class="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-                                
+
                                 <!-- Quote Icon -->
                                 <div class="flex justify-center mb-6">
                                     <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
@@ -381,7 +390,7 @@ class extends Component {
                                         </svg>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Rating -->
                                 <div class="flex justify-center mb-4">
                                     <template x-for="star in 5" :key="star">
@@ -390,10 +399,10 @@ class extends Component {
                                         </svg>
                                     </template>
                                 </div>
-                                
+
                                 <!-- Testimonial Text -->
                                 <p class="text-gray-700 text-lg md:text-xl text-center leading-relaxed mb-8 italic" x-text="testimonial.text"></p>
-                                
+
                                 <!-- Customer Info -->
                                 <div class="flex flex-col items-center">
                                     <img :src="testimonial.image" :alt="testimonial.name" class="w-20 h-20 rounded-full object-cover mb-4 border-4 border-amber-500">
@@ -404,31 +413,31 @@ class extends Component {
                             </div>
                         </template>
                     </div>
-                    
+
                     <!-- Navigation Arrows -->
                     <button @click="prev()" class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 w-12 h-12 bg-white hover:bg-amber-600 rounded-full shadow-lg flex items-center justify-center text-gray-800 hover:text-white transition-all duration-300 group">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </button>
-                    
+
                     <button @click="next()" class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 w-12 h-12 bg-white hover:bg-amber-600 rounded-full shadow-lg flex items-center justify-center text-gray-800 hover:text-white transition-all duration-300 group">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </button>
-                    
+
                     <!-- Dots Navigation -->
                     <div class="flex justify-center mt-8 space-x-2">
                         <template x-for="(testimonial, index) in testimonials" :key="index">
-                            <button @click="goToSlide(index)" 
+                            <button @click="goToSlide(index)"
                                     :class="{ 'bg-amber-600 w-8': currentSlide === index, 'bg-gray-300 w-2': currentSlide !== index }"
                                     class="h-2 rounded-full transition-all duration-300 hover:bg-amber-500">
                             </button>
                         </template>
                     </div>
                 </div>
-                
+
                 <!-- Stats Section -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16">
                     <div class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
@@ -442,17 +451,17 @@ class extends Component {
                             </template>
                         </div>
                     </div>
-                    
+
                     <div class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
                         <div class="text-4xl font-bold text-amber-600 mb-2">500+</div>
                         <div class="text-gray-600 font-medium">Happy Customers</div>
                     </div>
-                    
+
                     <div class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
                         <div class="text-4xl font-bold text-amber-600 mb-2">2K+</div>
                         <div class="text-gray-600 font-medium">Cups Served</div>
                     </div>
-                    
+
                     <div class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
                         <div class="text-4xl font-bold text-amber-600 mb-2">3+</div>
                         <div class="text-gray-600 font-medium">Years Experience</div>
@@ -460,7 +469,7 @@ class extends Component {
                 </div>
             </div>
         </section>
-        
+
         <!-- Gallery Section -->
         <section id="gallery" class="py-20 px-8 bg-white">
             <div class="max-w-6xl mx-auto">
@@ -469,7 +478,7 @@ class extends Component {
                     <div class="w-24 h-1 bg-amber-500 mx-auto mb-8"></div>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">Lihat suasana dan momen-momen spesial di Qio Coffee.</p>
                 </div>
-                
+
                 <!-- Gallery Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Gallery Item 1 - Large -->
@@ -480,7 +489,7 @@ class extends Component {
                             <p class="text-gray-200 mt-2">Suasana nyaman untuk bersantai dan bekerja</p>
                         </div>
                     </div>
-                    
+
                     <!-- Gallery Item 2 -->
                     <div class="relative overflow-hidden rounded-lg shadow-lg group">
                         <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600" alt="Coffee Brewing" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
@@ -489,7 +498,7 @@ class extends Component {
                             <p class="text-gray-200 mt-2">Seni menyeduh kopi</p>
                         </div>
                     </div>
-                    
+
                     <!-- Gallery Item 3 -->
                     <div class="relative overflow-hidden rounded-lg shadow-lg group">
                         <img src="https://images.unsplash.com/photo-1511081692775-05d0f180a065?w=600" alt="Coffee Beans" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
@@ -498,7 +507,7 @@ class extends Component {
                             <p class="text-gray-200 mt-2">Kualitas terbaik dari petani lokal</p>
                         </div>
                     </div>
-                    
+
                     <!-- Gallery Item 4 -->
                     <div class="relative overflow-hidden rounded-lg shadow-lg group">
                         <img src="https://images.unsplash.com/photo-1513267048331-5611cad62e41?w=600" alt="Coffee Art" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
@@ -507,7 +516,7 @@ class extends Component {
                             <p class="text-gray-200 mt-2">Kreasi seni di setiap cangkir</p>
                         </div>
                     </div>
-                    
+
                     <!-- Gallery Item 5 -->
                     <div class="relative overflow-hidden rounded-lg shadow-lg group">
                         <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600" alt="Coffee Shop Event" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
@@ -516,7 +525,7 @@ class extends Component {
                             <p class="text-gray-200 mt-2">Workshop dan gathering komunitas</p>
                         </div>
                     </div>
-                    
+
                     <!-- Gallery Item 6 -->
                     <div class="relative overflow-hidden rounded-lg shadow-lg group">
                         <img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=600" alt="Coffee and Dessert" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
@@ -526,7 +535,7 @@ class extends Component {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Instagram Link -->
                 <div class="text-center mt-12">
                     <a href="#" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-amber-500 to-amber-700 text-white font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
@@ -716,5 +725,5 @@ class extends Component {
             </a>
         </div>
     </footer>
-    
+
 </div>

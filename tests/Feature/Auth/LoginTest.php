@@ -31,7 +31,7 @@ class LoginTest extends TestCase
             ->set('username', 'testuser')
             ->set('password', 'password')
             ->call('login')
-            ->assertRedirect('/');
+            ->assertRedirect('/dashboard');
 
         $this->assertAuthenticatedAs($user);
     }

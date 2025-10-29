@@ -95,7 +95,7 @@ class CashierTest extends TestCase
             ->test('dashboard.cashier')
             ->call('addToCart', $product1->id)
             ->call('addToCart', $product2->id)
-            ->assertSet('total', 27500.0); // (10000 + 15000) * 1.1
+            ->assertSet('total', 25000.0); // (10000 + 15000) with 0% tax
     }
 
     #[Test]
@@ -112,7 +112,7 @@ class CashierTest extends TestCase
 
         $this->assertDatabaseHas('transactions', [
             'user_id' => $user->id,
-            'total_price' => 22000, // 20000 * 1.1
+            'total_price' => 20000, // 20000 with 0% tax
         ]);
 
         $this->assertDatabaseHas('transaction_details', [

@@ -29,6 +29,7 @@ class ProductFactory extends Factory
             'description' => fake()->sentence(),
             'price' => fake()->numberBetween(15000, 50000),
             'image' => null,
+            'category_id' => \App\Models\Category::factory(),
         ];
     }
 }

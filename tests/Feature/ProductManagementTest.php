@@ -46,17 +46,20 @@ class ProductManagementTest extends TestCase
     public function an_authenticated_user_can_create_a_product()
     {
         $user = User::factory()->create();
+        $category = \App\Models\Category::factory()->create();
 
         Livewire::actingAs($user)
             ->test('dashboard.product')
             ->set('form.name', 'Espresso')
             ->set('form.description', 'Kopi hitam pekat.')
             ->set('form.price', 15000)
+            ->set('form.category_id', $category->id)
             ->call('save');
 
         $this->assertDatabaseHas('products', [
             'name' => 'Espresso',
             'price' => 15000,
+            'category_id' => $category->id,
         ]);
     }
 

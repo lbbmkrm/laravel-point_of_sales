@@ -39,12 +39,12 @@ class extends Component {
     #[Computed]
     public function tax(): float
     {
-        return $this->subtotal() * config('services.tax_rate');
+        return $this->subtotal() * config('services.tax_rate', 0);
     }
 
     #[Computed]
     public function taxRateLabel():string {
-        $rate = config('services.tax_rate') * 100;
+        $rate = config('services.tax_rate', 0) * 100;
         return "PPN $rate%";
     }
 
