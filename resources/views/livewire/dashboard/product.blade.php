@@ -2,48 +2,36 @@
 
 use App\Livewire\Forms\ProductForm;
 use App\Models\Product;
-use App\Models\Category;
 use App\Services\ProductService;
 use App\Services\CategoryService;
-use Livewire\Volt\Component;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Volt\Component;
 use Livewire\Attributes\Title;
+use Illuminate\Support\Facades\Gate;
 
 new
 #[Title('Products')]
 class extends Component
 {
     public ProductForm $form;
-
     public Collection $products;
     public Collection $categories;
 
     public bool $showModal = false;
+    public bool $showDeleteModal = false;
     public bool $isEditMode = false;
     public ?Product $productToDelete = null;
 
     public function mount(ProductService $productService, CategoryService $categoryService): void
     {
+        Gate::authorize('viewAny', Product::class);
         $this->products = $productService->getAllProducts();
         $this->categories = $categoryService->getAllCategories();
     }
 
-    public function save(ProductService $productService): void
-    {
-        $validatedData = $this->form->validate();
-
-        if ($this->isEditMode) {
-            $productService->updateProduct($this->form->product, $validatedData);
-        } else {
-            $productService->createNewProduct($validatedData);
-        }
-
-        $this->closeModal();
-        $this->products = $productService->getAllProducts();
-    }
-
     public function openModal(): void
     {
+        Gate::authorize('create', Product::class);
         $this->isEditMode = false;
         $this->form->reset();
         $this->showModal = true;
@@ -51,186 +39,232 @@ class extends Component
 
     public function edit(Product $product): void
     {
+        Gate::authorize('update', $product);
         $this->isEditMode = true;
         $this->form->setProduct($product);
         $this->showModal = true;
     }
 
-    public function closeModal(): void
+    public function save(ProductService $productService): void
     {
-        $this->showModal = false;
-        $this->form->reset();
+        try {
+            $validated = $this->form->validate();
+
+            if ($this->isEditMode) {
+                $productService->updateProduct($this->form->product, $validated);
+                session()->flash('success', 'Produk berhasil diperbarui.');
+            } else {
+                $productService->createNewProduct($validated);
+                session()->flash('success', 'Produk baru berhasil ditambahkan.');
+            }
+
+            $this->closeModal();
+            $this->products = $productService->getAllProducts();
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            session()->flash('error', 'Anda tidak memiliki izin untuk melakukan tindakan ini.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan saat menyimpan produk.');
+        }
     }
 
     public function delete(Product $product): void
     {
+        Gate::authorize('delete', $product);
         $this->productToDelete = $product;
-    }
-
-    public function cancelDelete(): void
-    {
-        $this->productToDelete = null;
+        $this->showDeleteModal = true;
     }
 
     public function confirmDelete(ProductService $productService): void
     {
-        if ($this->productToDelete) {
-            $productService->deleteProduct($this->productToDelete);
-            $this->productToDelete = null;
-            $this->products = $productService->getAllProducts();
+        try {
+            if ($this->productToDelete) {
+                $productService->deleteProduct($this->productToDelete);
+                session()->flash('success', 'Produk berhasil dihapus.');
+                $this->productToDelete = null;
+                $this->products = $productService->getAllProducts();
+            }
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            session()->flash('error', 'Anda tidak memiliki izin untuk menghapus produk.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan saat menghapus produk.');
+        } finally {
+            $this->showDeleteModal = false;
         }
     }
-};
 
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->showDeleteModal = false;
+        $this->form->reset();
+    }
+};
 ?>
 
-<section id="product" class="p-6 bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header Section -->
-        <div class="mb-6 flex items-center justify-between">
-            <div>
-                <h4 class="text-2xl font-bold text-gray-800 mb-1">Manajemen Produk</h4>
-                <p class="text-sm text-gray-500">Kelola katalog menu kopi Anda</p>
-            </div>
-            <button wire:click="openModal" class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150 flex items-center gap-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
-                Tambah Produk
-            </button>
+<div x-data class="p-6 space-y-6">
+
+    {{-- Flash messages --}}
+    @if (session('success'))
+        <div x-transition.opacity
+             class="bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded shadow-sm">
+            {{ session('success') }}
         </div>
+    @elseif (session('error'))
+        <div x-transition.opacity
+             class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded shadow-sm">
+            {{ session('error') }}
+        </div>
+    @endif
 
-        <!-- Table Card -->
-        <div wire:loading.class.delay="opacity-50 transition-opacity" wire:target="save,confirmDelete" class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-100 border-b border-gray-200">
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Produk</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Kategori</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Deskripsi</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Harga</th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
+    {{-- Header --}}
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-semibold text-gray-800">Daftar Produk</h1>
+        @can('create', App\Models\Product::class)
+            <button wire:click="openModal"
+                    class="bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer">
+                + Tambah Produk
+            </button>
+        @endcan
+    </div>
 
-                    <tbody class="divide-y divide-gray-200">
-                        @forelse ($products as $product)
-                            <tr wire:key="{{ $product->id }}" class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <img src="{{ $product->image ?? asset('images/default-coffee-menu.jpg') }}" alt="{{ $product->name }}" class="w-12 h-12 object-cover rounded-lg">
-                                        <div class="ml-4">
-                                            <p class="text-sm font-semibold text-gray-800">{{ $product->name }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-sm text-gray-600">{{ $product->category->name }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-sm text-gray-600 max-w-xs">{{ Str::limit($product->description, 80) }}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-sm font-bold text-gray-800">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <button wire:click="edit({{ $product->id }})" class="cursor-pointer p-2 text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-150 ring-1 ring-blue-200" title="Edit">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                            </svg>
-                                        </button>
-                                        <button wire:click="delete({{ $product->id }})" class="cursor-pointer p-2 text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors duration-150 ring-1 ring-red-200" title="Delete">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center py-10 text-gray-500">
-                                    Belum ada produk. Silakan tambahkan produk baru.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+    {{-- Product table --}}
+    <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-100">
+        <table class="min-w-full text-sm text-gray-700">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left font-medium">Nama Produk</th>
+                    <th class="px-4 py-3 text-left font-medium">Harga</th>
+                    <th class="px-4 py-3 text-left font-medium">Kategori</th>
+
+                    @can('hasProductActions', App\Models\Product::class)
+                        <th class="px-4 py-3 text-center font-medium">Aksi</th>
+                    @endcan
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($products as $product)
+                    <tr>
+                        <td class="px-4 py-3">{{ $product->name }}</td>
+                        <td class="px-4 py-3">Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3">{{ $product->category->name ?? '-' }}</td>
+
+                        @canany(['update', 'delete'], $product)
+                            <td class="px-4 py-3 text-center space-x-2">
+                                @can('update', $product)
+                                    <button wire:click="edit({{ $product->id }})"
+                                            class="inline-flex items-center justify-center p-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-all duration-200 cursor-pointer">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M15.232 5.232l3.536 3.536m-2.036-2.036L7.5 16.964l-4 1 1-4 9.232-9.232z"/>
+                                        </svg>
+                                    </button>
+                                @endcan
+
+                                @can('delete', $product)
+                                    <button wire:click="delete({{ $product->id }})"
+                                            class="inline-flex items-center justify-center p-2 rounded-lg bg-red-50 hover:bg-red-100 transition-all duration-200 cursor-pointer">
+                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4"/>
+                                        </svg>
+                                    </button>
+                                @endcan
+                            </td>
+                        @endcanany
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="@can('hasProductActions', App\Models\Product::class) 4 @else 3 @endcan"
+                            class="text-center text-gray-500 py-8">
+                            Belum ada produk.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Modal Tambah/Edit Produk --}}
+    <div x-show="$wire.showModal" x-transition.opacity.scale.95 x-cloak
+         class="fixed h-full inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div x-transition
+             class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-800">
+                    {{ $isEditMode ? 'Edit Produk' : 'Tambah Produk' }}
+                </h2>
+                <button wire:click="closeModal"
+                        class="text-gray-400 hover:text-gray-600 transition-colors duration-150 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form wire:submit.prevent="save" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Produk</label>
+                    <input wire:model="form.name" type="text"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none">
+                    @error('form.name')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                    <input wire:model="form.price" type="number"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none">
+                    @error('form.price')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                    <textarea wire:model="form.description" rows="3"
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"></textarea>
+                    @error('form.description')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" wire:click="closeModal"
+                            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-all duration-150 cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-all duration-150 cursor-pointer">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Modal Konfirmasi Hapus --}}
+    <div x-show="$wire.showDeleteModal" x-transition.opacity.scale.90 x-cloak
+         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div x-transition
+             class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all duration-300">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Hapus Produk</h2>
+            <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus produk ini?</p>
+            <div class="flex justify-end space-x-2">
+                <button wire:click="closeModal"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-all duration-150 cursor-pointer">
+                    Batal
+                </button>
+                <button wire:click="confirmDelete"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all duration-150 cursor-pointer">
+                    Hapus
+                </button>
             </div>
         </div>
     </div>
 
-    {{-- Add/Edit Modal --}}
-    @if ($showModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-                <form wire:submit.prevent="save">
-                    <h2 class="text-xl font-semibold mb-5">{{ $isEditMode ? 'Edit Produk' : 'Tambah Produk Baru' }}</h2>
-
-                    <div class="mb-4">
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Produk</label>
-                        <input type="text" wire:model="form.name" id="name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        @error('form.name') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea wire:model="form.description" id="description" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-                        @error('form.description') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                        <select wire:model="form.category_id" id="category" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('form.category_id') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <input type="number" step="500" wire:model="form.price" id="price" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        @error('form.price') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="flex justify-end space-x-4 mt-6">
-                        <button type="button" wire:click="closeModal" class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Batal</button>
-                        <button type="submit" wire:loading.attr="disabled" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
-                            <svg wire:loading wire:target="save" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span wire:loading.remove wire:target="save">Simpan</span>
-                            <span wire:loading wire:target="save">Menyimpan...</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    @endif
-
-    {{-- Delete Confirmation Modal --}}
-    @if ($productToDelete)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-                <h2 class="text-xl font-semibold mb-4">Konfirmasi Hapus</h2>
-                <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus produk "<strong>{{ $productToDelete->name }}</strong>"? Tindakan ini tidak dapat dibatalkan.</p>
-                <div class="flex justify-end space-x-4">
-                    <button wire:click="cancelDelete" class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Batal</button>
-                    <button wire:click="confirmDelete" wire:loading.attr="disabled" class="cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
-                        <svg wire:loading wire:target="confirmDelete" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span wire:loading.remove wire:target="confirmDelete">Ya, Hapus</span>
-                        <span wire:loading wire:target="confirmDelete">Menghapus...</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
-</section>
+</div>

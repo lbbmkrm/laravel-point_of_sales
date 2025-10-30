@@ -24,7 +24,6 @@ class extends Component {
     #[Url(as: 'q', keep: true)]
     public string $search = '';
 
-    
     #[Computed]
     public function products() {
         return Product::where('name', 'like', "%$this->search%")->orderBy('name', 'asc')->get();
@@ -43,7 +42,7 @@ class extends Component {
     }
 
     #[Computed]
-    public function taxRateLabel():string {
+    public function taxRateLabel(): string {
         $rate = config('services.tax_rate', 0) * 100;
         return "PPN $rate%";
     }
@@ -59,7 +58,7 @@ class extends Component {
         $product = collect($this->products)->firstWhere('id', $productId);
 
         if (!$product) {
-            $this->dispatch('alert', 'Produk tidak ditemukan');
+            session()->flash('error', 'Produk tidak ditemukan.');
             return;
         }
 
@@ -73,38 +72,45 @@ class extends Component {
                 'quantity' => 1,
             ];
         }
+
+        session()->flash('success', "{$product['name']} ditambahkan ke keranjang.");
     }
 
     public function removeFromCart($productId): void
     {
-        unset($this->cart[$productId]);
+        if (isset($this->cart[$productId])) {
+            $productName = $this->cart[$productId]['name'];
+            unset($this->cart[$productId]);
+            session()->flash('success', "$productName dihapus dari keranjang.");
+        }
     }
 
     public function clearCart(): void
     {
         $this->cart = [];
+        session()->flash('success', 'Keranjang berhasil dikosongkan.');
     }
 
     public function openCheckoutModal(): void
     {
         if (empty($this->cart)) {
-            $this->dispatch('alert', 'Keranjang masih kosong!');
+            session()->flash('error', 'Keranjang masih kosong!');
             return;
         }
         $this->showCheckout = true;
     }
 
-    public function closeAndResetModal():void {
+    public function closeAndResetModal(): void {
         $this->showCheckout = false;
         $this->resetErrorBag();
         $this->reset('paymentAmount', 'change');
     }
 
-    public function updatedPaymentAmount($value):void {
-        if(is_numeric($value) && $value > 0) {
+    public function updatedPaymentAmount($value): void {
+        if (is_numeric($value) && $value > 0) {
             $this->change = (float) $value - $this->total();
             $this->resetErrorBag('paymentAmount');
-        }else{
+        } else {
             $this->reset('change');
         }
     }
@@ -123,7 +129,7 @@ class extends Component {
         $this->resetErrorBag('paymentAmount');
     }
 
-   public function checkout(TransactionService $transactionService): void
+    public function checkout(TransactionService $transactionService): void
     { 
         $this->validate();
         
@@ -149,7 +155,6 @@ class extends Component {
             ]); 
             
             $this->reset(['cart', 'paymentAmount', 'change', 'showCheckout']);
-            
             $this->showSuccess = true;
 
             $this->successTotal = $finalTotal;
@@ -160,12 +165,25 @@ class extends Component {
             
         } catch (\Exception $e) {
             logger()->error('Checkout failed', ['error' => $e->getMessage()]);
-            $this->addError('checkout', 'Gagal melakukan transaksi: ' . $e->getMessage());
+            session()->flash('error', 'Gagal melakukan transaksi: ' . $e->getMessage());
         }
     }
 };
 ?>
+
 <div x-data>
+    @if (session('success'))
+        <div class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm font-medium">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <!-- Content Area -->
     <div class="flex flex-col overflow-hidden md:flex-row">
         <!-- Menu Section -->
