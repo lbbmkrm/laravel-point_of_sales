@@ -18,11 +18,13 @@ Proyek ini secara disiplin menerapkan pola arsitektur berlapis untuk memisahkan 
 **`Livewire Component` -> `Service` -> `Repository`**
 
 1.  **Livewire Component (UI & State Management):**
+
     -   **Lokasi:** `resources/views/livewire/`
     -   **Tanggung Jawab:** Mengelola state dari UI (misalnya, isi keranjang belanja, input form, status modal). Menangkap interaksi pengguna (klik tombol) dan memanggil `Service` yang sesuai. **Tidak berisi logika bisnis atau query database secara langsung.**
     -   **Contoh:** `cashier.blade.php`, `product.blade.php`.
 
 2.  **Service (Business Logic):**
+
     -   **Lokasi:** `app/Services/`
     -   **Tanggung Jawab:** Berisi semua logika bisnis inti. Mengorkestrasi data dari beberapa sumber jika perlu, melakukan kalkulasi, dan membuat keputusan. Memanggil `Repository` untuk berinteraksi dengan database.
     -   **Contoh:** `TransactionService` berisi logika untuk proses checkout, `ProductService` untuk mengelola produk.
@@ -39,29 +41,33 @@ Pola ini membuat aplikasi sangat **modular, mudah di-maintain, dan mudah di-test
 Berikut adalah panduan untuk direktori-direktori utama dalam proyek:
 
 -   `app/`
+
     -   `Http/Controllers/`: Sangat minimalis karena sebagian besar logika halaman ditangani oleh komponen Livewire/Volt.
-    -   `Livewire/Forms/`: Berisi *Form Objects* Livewire. Digunakan untuk mengisolasi properti form dan aturan validasinya dari komponen utama. Contoh: `ProductForm.php`.
+    -   `Livewire/Forms/`: Berisi _Form Objects_ Livewire. Digunakan untuk mengisolasi properti form dan aturan validasinya dari komponen utama. Contoh: `ProductForm.php`.
     -   `Models/`: Berisi Eloquent Model yang mendefinisikan skema tabel dan relasi antar data. Contoh: `Product.php`, `Transaction.php`.
     -   `Providers/`: Berisi Service Provider, termasuk `VoltServiceProvider.php` yang meng-scan komponen Volt.
     -   `Repositories/`: Lapisan akses data (lihat penjelasan di atas).
     -   `Services/`: Lapisan logika bisnis (lihat penjelasan di atas).
 
 -   `database/`
+
     -   `factories/`: Untuk membuat data dummy saat testing atau seeding.
     -   `migrations/`: Skema database dalam bentuk kode.
     -   `seeders/`: Untuk mengisi database dengan data awal (misal: `UserSeeder`, `ProductSeeder`).
 
 -   `resources/`
+
     -   `css/`, `js/`: Aset frontend yang akan di-compile oleh Vite.
     -   `views/`:
         -   `layouts/`: Berisi layout utama aplikasi (`app.blade.php`, `guest.blade.php`).
         -   `livewire/`: **Direktori paling penting.** Berisi file-file komponen Volt yang menyatukan logika PHP dan markup Blade HTML.
 
 -   `routes/`
+
     -   `web.php`: Mendefinisikan rute aplikasi. Menggunakan `Volt::route()` untuk menghubungkan URL ke komponen Volt secara langsung.
 
 -   `tests/`
-    -   `Feature/`: Berisi *feature tests* yang menguji fungsionalitas dari sudut pandang pengguna. Proyek ini memiliki cakupan tes yang baik untuk fitur-fitur krusial seperti `CashierTest.php` dan `ProductManagementTest.php`.
+    -   `Feature/`: Berisi _feature tests_ yang menguji fungsionalitas dari sudut pandang pengguna. Proyek ini memiliki cakupan tes yang baik untuk fitur-fitur krusial seperti `CashierTest.php` dan `ProductManagementTest.php`.
 
 ## 4. Contoh Alur Kerja: Checkout Transaksi
 

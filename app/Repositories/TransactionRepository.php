@@ -3,7 +3,10 @@
 namespace App\Repositories;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\MassAssignmentException;
@@ -69,6 +72,51 @@ class TransactionRepository
             return $transaction->delete();
         } catch (Exception $e) {
             throw new Exception('Failed to delete transaction', 500);
+        }
+    }
+
+    public function todayTransactions(): Collection
+    {
+        try {
+            return $this->model->whereDate("created_at", Carbon::today())->get();
+        } catch (QueryException $e) {
+            throw new Exception('Failed to get transactions', 500);
+        } catch (Exception $e) {
+            throw new Exception('Failed to get transactions', 500);
+        }
+    }
+
+    public function totalRevenue(?callable $callback = null): float
+    {
+        $query = $this->model->newQuery();
+
+        if ($callback) {
+            $callback($query);
+        }
+
+        return $query->sum('total_price');
+    }
+
+    public function getTransactionsBetweenDates(Carbon $start, Carbon $end): Collection
+    {
+        try {
+            return $this->model->whereBetween('created_at', [$start, $end])->get();
+        } catch (Exception $e) {
+            throw new Exception('Failed to get transactions for date range', 500);
+        }
+    }
+
+    public function getDailySalesSummary(Carbon $start, Carbon $end): Collection
+    {
+        try {
+            return $this->model
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_price) as total'))
+                ->whereBetween('created_at', [$start, $end])
+                ->groupBy('date')
+                ->orderBy('date', 'asc')
+                ->get();
+        } catch (Exception $e) {
+            throw new Exception('Failed to get daily sales summary', 500);
         }
     }
 }

@@ -6,6 +6,7 @@ use Exception;
 use App\Models\Transaction;
 use App\Repositories\TransactionDetailRepository;
 use App\Repositories\TransactionRepository;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -74,5 +75,31 @@ class TransactionService
                 $e->getCode() ?? 500,
             );
         }
+    }
+
+    public function getTodayTransactions(): Collection
+    {
+        return $this->transactionRepository->todayTransactions();
+    }
+
+
+    public function getTodayRevenue(): float
+    {
+        return $this->transactionRepository->totalRevenue(function ($query) {
+            $query->whereDate('created_at', Carbon::today());
+        });
+    }
+    public function getWeeklyRevenue()
+    {
+        return $this->transactionRepository->totalRevenue(function ($query) {
+            $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+        });
+    }
+
+    public function getMonthlyRevenue()
+    {
+        return $this->transactionRepository->totalRevenue(function ($query) {
+            $query->whereMonth('created_at', Carbon::now()->month);
+        });
     }
 }
