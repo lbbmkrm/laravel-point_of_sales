@@ -1,6 +1,5 @@
 <?php
 
-use App\Livewire\Forms\ProductForm;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\CategoryService;
@@ -8,9 +7,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Livewire\Volt\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 new #[Title("Products")] class extends Component {
-    public ProductForm $form;
     public Collection $products;
     public Collection $categories;
 
@@ -18,6 +17,23 @@ new #[Title("Products")] class extends Component {
     public bool $showDeleteModal = false;
     public bool $isEditMode = false;
     public ?Product $productToDelete = null;
+    public ?Product $editingProduct = null;
+
+    // Form fields
+    public string $name = '';
+    public ?int $price = null;
+    public string $description = '';
+    public ?int $category_id = null;
+
+    protected function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'price' => ['required', 'integer', 'min:0'],
+            'description' => ['nullable', 'string'],
+            'category_id' => ['required', 'integer', Rule::exists('categories', 'id')],
+        ];
+    }
 
     public function mount(
         ProductService $productService,
@@ -32,7 +48,7 @@ new #[Title("Products")] class extends Component {
     {
         Gate::authorize("create", Product::class);
         $this->isEditMode = false;
-        $this->form->reset();
+        $this->resetForm();
         $this->showModal = true;
     }
 
@@ -40,18 +56,24 @@ new #[Title("Products")] class extends Component {
     {
         Gate::authorize("update", $product);
         $this->isEditMode = true;
-        $this->form->setProduct($product);
+        $this->editingProduct = $product;
+
+        $this->name = $product->name;
+        $this->price = $product->price;
+        $this->description = $product->description;
+        $this->category_id = $product->category_id;
+
         $this->showModal = true;
     }
 
     public function save(ProductService $productService): void
     {
         try {
-            $validated = $this->form->validate();
+            $validated = $this->validate();
 
             if ($this->isEditMode) {
                 $productService->updateProduct(
-                    $this->form->product,
+                    $this->editingProduct,
                     $validated,
                 );
                 session()->flash("success", "Produk berhasil diperbarui.");
@@ -65,6 +87,9 @@ new #[Title("Products")] class extends Component {
 
             $this->closeModal();
             $this->products = $productService->getAllProducts();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exception so Livewire can handle it properly
+            throw $e;
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             session()->flash(
                 "error",
@@ -113,7 +138,12 @@ new #[Title("Products")] class extends Component {
     {
         $this->showModal = false;
         $this->showDeleteModal = false;
-        $this->form->reset();
+        $this->resetForm();
+    }
+
+    private function resetForm(): void
+    {
+        $this->reset(['name', 'price', 'description', 'category_id', 'editingProduct']);
     }
 };
 ?>
@@ -178,7 +208,7 @@ new #[Title("Products")] class extends Component {
 
                         @canany(["update", "delete"], $product)
                             <td
-                                class="px-4 py-3 flex justify-between items-center space-x-2"
+                                class="px-4 py-3 flex justify-center items-center space-x-2"
                             >
                                 @can("update", $product)
                                     <button
@@ -275,11 +305,11 @@ new #[Title("Products")] class extends Component {
                         Nama Produk
                     </label>
                     <input
-                        wire:model="form.name"
+                        wire:model="name"
                         type="text"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"
                     />
-                    @error("form.name")
+                    @error("name")
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -289,11 +319,11 @@ new #[Title("Products")] class extends Component {
                         Harga
                     </label>
                     <input
-                        wire:model="form.price"
+                        wire:model="price"
                         type="number"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"
                     />
-                    @error("form.price")
+                    @error("price")
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -303,11 +333,11 @@ new #[Title("Products")] class extends Component {
                         Deskripsi
                     </label>
                     <textarea
-                        wire:model="form.description"
+                        wire:model="description"
                         rows="3"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"
                     ></textarea>
-                    @error("form.description")
+                    @error("description")
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>

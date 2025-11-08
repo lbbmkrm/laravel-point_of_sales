@@ -102,12 +102,6 @@ class extends Component
                 <span wire:loading wire:target="login">Memproses...</span>
             </button>
 
-            <p class="mt-2 text-sm text-gray-500 text-center">
-                Belum punya akun?
-                <a href="{{ route('register') }}" class="font-medium text-blue-600 hover:underline">
-                    Daftar disini
-                </a>
-            </p>
         </form>
     </div>
 </div>

@@ -13,6 +13,17 @@ class ProductManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    private User $owner;
+    private User $cashier;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->owner = User::factory()->create(['role' => 'owner']);
+        $this->cashier = User::factory()->create(['role' => 'cashier']);
+    }
+
     #[Test]
     public function unauthenticated_users_are_redirected_from_products_page()
     {
@@ -20,40 +31,36 @@ class ProductManagementTest extends TestCase
     }
 
     #[Test]
-    public function products_page_can_be_rendered_for_authenticated_users()
+    public function products_page_can_be_rendered_for_owner()
     {
-        $user = User::factory()->create();
-
-        $this->actingAs($user)
+        $this->actingAs($this->owner)
             ->get(route('products'))
             ->assertOk()
             ->assertSeeLivewire('dashboard.product')
-            ->assertSee('Manajemen Produk');
+            ->assertSee('Daftar Produk');
     }
 
     #[Test]
-    public function it_displays_products_from_database()
+    public function it_displays_products_from_database_for_owner()
     {
-        $user = User::factory()->create();
         $product = Product::factory()->create(['name' => 'Kopi Susu Gula Aren']);
 
-        $this->actingAs($user)
+        $this->actingAs($this->owner)
             ->get(route('products'))
             ->assertSee('Kopi Susu Gula Aren');
     }
 
     #[Test]
-    public function an_authenticated_user_can_create_a_product()
+    public function an_owner_can_create_a_product()
     {
-        $user = User::factory()->create();
         $category = \App\Models\Category::factory()->create();
 
-        Livewire::actingAs($user)
+        Livewire::actingAs($this->owner)
             ->test('dashboard.product')
-            ->set('form.name', 'Espresso')
-            ->set('form.description', 'Kopi hitam pekat.')
-            ->set('form.price', 15000)
-            ->set('form.category_id', $category->id)
+            ->set('name', 'Espresso')
+            ->set('description', 'Kopi hitam pekat.')
+            ->set('price', 15000)
+            ->set('category_id', $category->id)
             ->call('save');
 
         $this->assertDatabaseHas('products', [
@@ -64,48 +71,49 @@ class ProductManagementTest extends TestCase
     }
 
     #[Test]
-    public function product_creation_requires_a_name()
+    public function product_creation_requires_a_name_for_owner()
     {
-        $user = User::factory()->create();
-
-        Livewire::actingAs($user)
+        $category = \App\Models\Category::factory()->create();
+        Livewire::actingAs($this->owner)
             ->test('dashboard.product')
-            ->set('form.name', '') // Invalid name
-            ->set('form.description', 'Deskripsi valid.')
-            ->set('form.price', 10000)
+            ->call('openModal')
+            ->set('name', '')
+            ->set('description', 'Deskripsi valid.')
+            ->set('price', 10000)
+            ->set('category_id', $category->id)
             ->call('save')
-            ->assertHasErrors(['form.name' => 'required']);
+            ->assertHasErrors(['name' => 'required']);
     }
 
     #[Test]
-    public function an_authenticated_user_can_update_a_product()
+    public function an_owner_can_update_a_product()
     {
-        $user = User::factory()->create();
         $product = Product::factory()->create();
+        $category = \App\Models\Category::factory()->create();
 
-        Livewire::actingAs($user)
+        Livewire::actingAs($this->owner)
             ->test('dashboard.product')
             ->call('edit', $product)
-            ->set('form.name', 'Updated Name')
-            ->set('form.price', 25000)
+            ->set('name', 'Updated Name')
+            ->set('price', 25000)
+            ->set('category_id', $category->id)
             ->call('save');
 
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
             'name' => 'Updated Name',
-            'price' => '25000.00',
+            'price' => '25000',
         ]);
     }
 
     #[Test]
-    public function an_authenticated_user_can_delete_a_product()
+    public function an_owner_can_delete_a_product()
     {
-        $user = User::factory()->create();
         $product = Product::factory()->create();
 
         $this->assertDatabaseHas('products', ['id' => $product->id]);
 
-        Livewire::actingAs($user)
+        Livewire::actingAs($this->owner)
             ->test('dashboard.product')
             ->call('delete', $product)
             ->call('confirmDelete');
