@@ -11,6 +11,7 @@ new #[Title("Dashboard")] class extends Component {
     public Collection $recentTransactions;
     public float $weeklyRevenue;
     public float $monthlyRevenue;
+    public Collection $weeklySalesData;
 
     public function mount(DashboardService $dashboardService): void
     {
@@ -20,6 +21,7 @@ new #[Title("Dashboard")] class extends Component {
         $this->recentTransactions = $dashboardService->getRecentTransactions();
         $this->weeklyRevenue = $dashboardService->getWeeklyRevenue();
         $this->monthlyRevenue = $dashboardService->getMonthlyRevenue();
+        $this->weeklySalesData = $dashboardService->getWeeklySalesData();
     }
 };
 ?>
@@ -331,31 +333,116 @@ new #[Title("Dashboard")] class extends Component {
     <!-- Performance Chart Placeholder -->
     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">
-            Grafik Penjualan Mingguan
+            Grafik Penjualan Minggu ini
         </h3>
         <div
-            class="h-64 bg-gray-50 rounded-lg flex items-center justify-center"
+            x-data="{
+                chart: null,
+                data: @js(data: $this->weeklySalesData),
+                error: null,
+                initChart() {
+                    try {
+                        const sales = this.data.map((item) => item.total)
+                        const labels = this.data.map((item) => item.date)
+                        const ctx = this.$refs.canvas.getContext('2d')
+                        if (this.chart) {
+                            this.chart.destroy()
+                        }
+                        this.chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: 'Penjualan',
+                                        data: sales,
+                                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                        borderColor: 'rgb(59, 130, 246)',
+                                        borderWidth: 2,
+                                        fill: false,
+                                        tension: 0.1,
+                                        pointRadius: 4,
+                                        pointHoverRadius: 6,
+                                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                                        pointBorderColor: '#fff',
+                                        pointBorderWidth: 2,
+                                    },
+                                ],
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false,
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        padding: 12,
+                                        titleFont: {
+                                            size: 14,
+                                        },
+                                        bodyFont: {
+                                            size: 13,
+                                        },
+                                        callbacks: {
+                                            label: function (context) {
+                                                return (
+                                                    'Rp ' +
+                                                    context.parsed.y.toLocaleString('id-ID')
+                                                )
+                                            },
+                                        },
+                                    },
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function (value) {
+                                                return 'Rp ' + value.toLocaleString('id-ID')
+                                            },
+                                        },
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.05)',
+                                        },
+                                    },
+                                    x: {
+                                        grid: {
+                                            display: false,
+                                        },
+                                    },
+                                },
+                            },
+                        })
+                        this.error = null
+                    } catch (e) {
+                        this.error = e.message
+                        console.error('Chart error:', e)
+                    }
+                },
+            }"
+            x-init="initChart()"
+            wire:ignore
+            class="relative h-96"
         >
-            <div class="text-center">
-                <svg
-                    class="w-16 h-16 text-gray-400 mx-auto mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+            <canvas x-ref="canvas" class="w-full h-full"></canvas>
+
+            <template x-if="error">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <p>
+                        Error Chart:
+                        <span x-text="error"></span>
+                    </p>
+                </div>
+            </template>
+            <template x-if="!error && data.length === 0">
+                <div
+                    class="absolute inset-0 flex items-center justify-center text-center text-gray-500 bg-white/80 backdrop-blur-sm"
                 >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"
-                    ></path>
-                </svg>
-                <p class="text-gray-600">Grafik akan ditampilkan di sini</p>
-                <p class="text-sm text-gray-500 mt-1">
-                    Pendapatan minggu ini: Rp
-                    {{ number_format($this->weeklyRevenue, 0, ",", ".") }}
-                </p>
-            </div>
+                    <p>Tidak ada data penjualan untuk periode ini.</p>
+                </div>
+            </template>
         </div>
     </div>
 </div>
