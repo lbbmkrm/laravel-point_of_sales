@@ -34,7 +34,7 @@ new #[Title("Dashboard")] class extends Component {
                     <p class="text-sm font-medium text-gray-600">
                         Transaksi Hari Ini
                     </p>
-                    <p class="text-2xl font-bold text-gray-900">
+                    <p class="text-2xl md:text-xl font-bold text-gray-900">
                         {{ $this->todayTransactions }}
                     </p>
                 </div>
@@ -65,7 +65,7 @@ new #[Title("Dashboard")] class extends Component {
                     <p class="text-sm font-medium text-gray-600">
                         Pendapatan Hari Ini
                     </p>
-                    <p class="text-2xl font-bold text-gray-900">
+                    <p class="text-2xl md:text-xl font-bold text-gray-900">
                         Rp
                         {{ number_format($this->todayRevenue, 0, ",", ".") }}
                     </p>
@@ -97,7 +97,7 @@ new #[Title("Dashboard")] class extends Component {
                     <p class="text-sm font-medium text-gray-600">
                         Total Produk
                     </p>
-                    <p class="text-2xl font-bold text-gray-900">
+                    <p class="text-2xl md:text-xl font-bold text-gray-900">
                         {{ $this->totalProducts }}
                     </p>
                 </div>
@@ -128,7 +128,7 @@ new #[Title("Dashboard")] class extends Component {
                     <p class="text-sm font-medium text-gray-600">
                         Pendapatan Bulan Ini
                     </p>
-                    <p class="text-2xl font-bold text-gray-900">
+                    <p class="text-2xl md:text-xl font-bold text-gray-900">
                         Rp
                         {{ number_format($this->monthlyRevenue, 0, ",", ".") }}
                     </p>

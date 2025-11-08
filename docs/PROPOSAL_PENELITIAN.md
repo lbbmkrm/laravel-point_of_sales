@@ -1,4 +1,4 @@
-# BLUEPRINT PENELITIAN DAN PENGEMBANGAN SISTEM
+# PROPOSAL PENELITIAN DAN PENGEMBANGAN SISTEM
 
 ---
 
@@ -52,9 +52,9 @@ Metodologi Agile dipilih karena fleksibilitasnya. Pendekatan iteratif memungkink
 **b. Justifikasi Pemilihan Arsitektur TALL Stack:**
 Pemilihan TALL Stack merupakan bagian inti dari hipotesis penelitian ini. Arsitektur ini dipilih sebagai solusi potensial untuk **tantangan efisiensi pengembangan** dengan argumen sebagai berikut:
 
--   **Pendekatan Terpadu (Unified Approach):** Memungkinkan pengembangan antarmuka yang sangat dinamis dan reaktif (seperti SPA) tanpa harus meninggalkan ekosistem Laravel. Ini mengurangi beban kognitif dan _context switching_ antara bahasa dan _framework_ yang berbeda.
--   **Kecepatan Pengembangan (Rapid Development):** Komponen Livewire memungkinkan logika frontend dan backend berada di dalam satu kelas PHP, yang secara signifikan mempercepat proses pembuatan fitur CRUD dan interaksi pengguna lainnya.
--   **Teknologi Tepat Guna (Appropriate Technology):** Untuk lingkup proyek UMKM yang dikerjakan oleh tim kecil atau solo developer, pendekatan "monolitik modern" ini menawarkan keseimbangan ideal antara kekuatan, kecepatan pengembangan, dan kemudahan pemeliharaan.
+- **Pendekatan Terpadu (Unified Approach):** Memungkinkan pengembangan antarmuka yang sangat dinamis dan reaktif (seperti SPA) tanpa harus meninggalkan ekosistem Laravel. Ini mengurangi beban kognitif dan _context switching_ antara bahasa dan _framework_ yang berbeda.
+- **Kecepatan Pengembangan (Rapid Development):** Komponen Livewire memungkinkan logika frontend dan backend berada di dalam satu kelas PHP, yang secara signifikan mempercepat proses pembuatan fitur CRUD dan interaksi pengguna lainnya.
+- **Teknologi Tepat Guna (Appropriate Technology):** Untuk lingkup proyek UMKM yang dikerjakan oleh tim kecil atau solo developer, pendekatan "monolitik modern" ini menawarkan keseimbangan ideal antara kekuatan, kecepatan pengembangan, dan kemudahan pemeliharaan.
 
 **c. Tahapan Pengembangan (Adaptasi Scrum Solo):**
 _Tabel tahapan pengembangan dipertahankan seperti sebelumnya._
@@ -76,12 +76,8 @@ Arsitektur TALL Stack memungkinkan pendekatan pengembangan yang sangat efisien. 
 **b. Fitur Fungsional Utama (Sebagai Bukti Konsep):**
 
 1.  **Sistem POS Internal (Solusi Efisiensi Operasional):**
-    -   **Manajemen Produk & Modul Kasir:** Dikembangkan dengan komponen Livewire untuk menunjukkan kecepatan pengembangan dan pengalaman pengguna yang reaktif.
+    - **Manajemen Produk & Modul Kasir:** Dikembangkan dengan komponen Livewire untuk menunjukkan kecepatan pengembangan dan pengalaman pengguna yang reaktif.
 2.  **Landing Page Publik (Solusi Kredibilitas Digital):**
-    -   **Menu Digital yang Selalu Konsisten:** Fitur unggulan di mana data diambil secara _real-time_ dari database yang sama dengan sistem POS. Ini secara langsung menunjukkan bagaimana arsitektur terpadu dapat menyelesaikan masalah inkonsistensi data.
+    - **Menu Digital yang Selalu Konsisten:** Fitur unggulan di mana data diambil secara _real-time_ dari database yang sama dengan sistem POS. Ini secara langsung menunjukkan bagaimana arsitektur terpadu dapat menyelesaikan masalah inkonsistensi data.
 
 ---
-
-### 7. Kerangka Penulisan Jurnal Ilmiah
-
-Struktur penulisan akan mengikuti standar publikasi ilmiah, dengan penekanan pada bab Hasil dan Pembahasan yang akan menganalisis tiga hal: (1) sejauh mana sistem menjawab masalah efisiensi operasional, (2) sejauh mana ia menjawab masalah kredibilitas digital, dan (3) analisis efektivitas penggunaan arsitektur TALL Stack dalam proses pengembangan sistem tersebut.

@@ -170,15 +170,16 @@ new #[Title("Products")] class extends Component {
                     <tr>
                         <td class="px-4 py-3">{{ $product->name }}</td>
                         <td class="px-4 py-3">
-                            Rp
-                            {{ number_format($product->price, 0, ",", ".") }}
+                            Rp.&nbsp;{{ number_format($product->price, 0, ",", ".") }}
                         </td>
                         <td class="px-4 py-3">
                             {{ $product->category->name ?? "-" }}
                         </td>
 
                         @canany(["update", "delete"], $product)
-                            <td class="px-4 py-3 text-center space-x-2">
+                            <td
+                                class="px-4 py-3 flex justify-between items-center space-x-2"
+                            >
                                 @can("update", $product)
                                     <button
                                         wire:click="edit({{ $product->id }})"

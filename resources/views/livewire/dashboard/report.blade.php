@@ -6,12 +6,13 @@ use App\Services\ReportService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 
 new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
     public string $startDate = "";
     public string $endDate = "";
-    public bool $showAllTime = false; // Fitur baru
-    public bool $showExportModal = false;
+    public bool $showAllTime = false;
     public array $reportData = [];
 
     public function mount(ReportService $reportService)
@@ -41,6 +42,9 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
         $this->reportData = $this->showAllTime
             ? $reportService->generateReport()
             : $reportService->generateReport($this->startDate, $this->endDate);
+
+        // Dispatch event untuk memperbarui Chart.js
+        $this->dispatch("report-updated", sales: $this->dailySalesData);
     }
 
     public function filterByDate(ReportService $reportService)
@@ -84,19 +88,39 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
         return $this->reportData["topSellingProducts"] ?? collect();
     }
 
-    public function exportPDF()
+    public function exportPdf()
     {
-        $this->showExportModal = true;
-    }
+        $startDate = $this->startDate;
+        $endDate = $this->endDate;
 
-    public function closeExportModal()
-    {
-        $this->showExportModal = false;
+        if ($this->showAllTime) {
+            $firstTransaction = $this->dailySalesData()->first();
+            $lastTransaction = $this->dailySalesData()->last();
+
+            $startDate = $firstTransaction
+                ? Carbon::parse($firstTransaction["date"])->format("Y-m-d")
+                : now()->format("Y-m-d");
+            $endDate = $lastTransaction
+                ? Carbon::parse($lastTransaction["date"])->format("Y-m-d")
+                : now()->format("Y-m-d");
+        }
+
+        $pdf = Pdf::loadView("pdf.report", [
+            "reportData" => $this->reportData,
+            "startDate" => $startDate,
+            "endDate" => $endDate,
+            "isAllTime" => $this->showAllTime,
+        ]);
+
+        $fileName = "laporan-penjualan-" . now()->format("Y-m-d") . ".pdf";
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->stream();
+        }, $fileName);
     }
 }; ?>
 
 <div class="space-y-6">
-    <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Laporan Penjualan</h1>
@@ -105,10 +129,14 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
             </p>
         </div>
         <button
-            wire:click="exportPDF"
-            class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-all duration-200"
+            wire:click="exportPdf"
+            wire:loading.attr="disabled"
+            wire:loading.class="opacity-75 cursor-wait"
+            class="inline-flex cursor-pointer items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-all duration-200"
         >
             <svg
+                wire:loading.remove
+                wire:target="exportPdf"
                 class="w-4 h-4 mr-2"
                 fill="none"
                 stroke="currentColor"
@@ -121,11 +149,33 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
                     d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
             </svg>
-            Export PDF
+            <svg
+                wire:loading
+                wire:target="exportPdf"
+                class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+            >
+                <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                ></circle>
+                <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+            </svg>
+            <span wire:loading wire:target="exportPdf">Mengekspor...</span>
+            <span wire:loading.remove wire:target="exportPdf">Export PDF</span>
         </button>
     </div>
 
-    <!-- Filter -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <form wire:submit="filterByDate" class="space-y-4">
             <div class="flex items-center space-x-3">
@@ -188,7 +238,6 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
         </form>
     </div>
 
-    <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         @php
             $cards = [
@@ -205,7 +254,7 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
             >
                 <div>
                     <p class="text-sm text-gray-600">{{ $card["title"] }}</p>
-                    <p class="text-2xl font-bold text-gray-900">
+                    <p class="text-2xl md:text-xl font-bold text-gray-900">
                         {{ $card["value"] }}
                     </p>
                 </div>
@@ -230,58 +279,144 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
         @endforeach
     </div>
 
-    <!-- Chart & Top Products -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Chart -->
         <div
             class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
         >
             <h3 class="text-lg font-semibold text-gray-900 mb-6">
                 Grafik Penjualan Harian
             </h3>
+
             <div
                 x-data="{
-                    sales: @js($this->dailySalesData),
-                    max: {{ $this->dailySalesData->max("total") ?: 1 }},
+                    chart: null,
+                    data: @js($this->dailySalesData),
+                    error: null,
+                    initChart() {
+                        try {
+                            const sales = this.data.map((item) => item.total)
+                            const labels = this.data.map((item) => item.date)
+                            const ctx = this.$refs.canvas.getContext('2d')
+                            if (this.chart) {
+                                this.chart.destroy()
+                            }
+                            this.chart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [
+                                        {
+                                            label: 'Penjualan',
+                                            data: sales,
+                                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                            borderColor: 'rgb(59, 130, 246)',
+                                            borderWidth: 2,
+                                            fill: true,
+                                            tension: 0.4,
+                                            pointRadius: 4,
+                                            pointHoverRadius: 6,
+                                            pointBackgroundColor: 'rgb(59, 130, 246)',
+                                            pointBorderColor: '#fff',
+                                            pointBorderWidth: 2,
+                                        },
+                                    ],
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: false,
+                                        },
+                                        tooltip: {
+                                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                            padding: 12,
+                                            titleFont: {
+                                                size: 14,
+                                            },
+                                            bodyFont: {
+                                                size: 13,
+                                            },
+                                            callbacks: {
+                                                label: function (context) {
+                                                    return (
+                                                        'Rp ' +
+                                                        context.parsed.y.toLocaleString('id-ID')
+                                                    )
+                                                },
+                                            },
+                                        },
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                callback: function (value) {
+                                                    return 'Rp ' + value.toLocaleString('id-ID')
+                                                },
+                                            },
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.05)',
+                                            },
+                                        },
+                                        x: {
+                                            grid: {
+                                                display: false,
+                                            },
+                                        },
+                                    },
+                                },
+                            })
+                            this.error = null
+                        } catch (e) {
+                            this.error = e.message
+                            console.error('Chart error:', e)
+                        }
+                    },
+                    updateChart(newData) {
+                        try {
+                            const newSales = newData.map((item) => item.total)
+                            const newLabels = newData.map((item) => item.date)
+                            if (this.chart) {
+                                this.chart.data.labels = newLabels
+                                this.chart.data.datasets[0].data = newSales
+                                this.chart.update()
+                            }
+                            this.error = null
+                        } catch (e) {
+                            this.error = e.message
+                            console.error('Chart update error:', e)
+                        }
+                    },
                 }"
-                class="h-64 flex items-end justify-center space-x-2"
+                x-init="initChart()"
+                @report-updated.window="data = $event.detail.sales; initChart()"
+                wire:ignore
+                class="relative h-96"
             >
-                <template x-for="(data, index) in sales" :key="index">
-                    <div class="flex flex-col items-center">
-                        <div
-                            class="bg-blue-500 rounded-t-sm transition-all duration-300 hover:bg-blue-600 w-8"
-                            :style="`height: ${(data.total / max * 12.5)}rem`"
-                            :title="`Rp ${Number(data.total).toLocaleString('id-ID')}`"
-                        ></div>
-                        <span
-                            class="text-xs text-gray-600 mt-2 rotate-[-45deg] origin-top-left"
-                            x-text="data.date"
-                        ></span>
+                <canvas x-ref="canvas" class="w-full h-full"></canvas>
+
+                <template x-if="error">
+                    <div
+                        class="absolute inset-0 flex items-center justify-center text-center text-red-600 bg-white/80 backdrop-blur-sm"
+                    >
+                        <p>
+                            Error Chart:
+                            <span x-text="error"></span>
+                        </p>
                     </div>
                 </template>
 
-                <template x-if="sales.length === 0">
-                    <div class="text-center text-gray-500 w-full">
-                        <svg
-                            class="w-16 h-16 mx-auto mb-4 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"
-                            ></path>
-                        </svg>
-                        <p>Tidak ada data penjualan untuk periode ini</p>
+                <template x-if="!error && data.length === 0">
+                    <div
+                        class="absolute inset-0 flex items-center justify-center text-center text-gray-500 bg-white/80 backdrop-blur-sm"
+                    >
+                        <p>Tidak ada data penjualan untuk periode ini.</p>
                     </div>
                 </template>
             </div>
         </div>
 
-        <!-- Top Products -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-6">
                 Produk Terlaris
@@ -320,48 +455,4 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
             </div>
         </div>
     </div>
-
-    <!-- Modal -->
-    @if ($showExportModal)
-        <div
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-        >
-            <div
-                class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl"
-            >
-                <div class="text-center">
-                    <div
-                        class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
-                    >
-                        <svg
-                            class="w-8 h-8 text-green-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
-                        Export Berhasil
-                    </h3>
-                    <p class="text-gray-600 mb-6">
-                        Fitur export PDF akan segera tersedia dalam update
-                        mendatang.
-                    </p>
-                    <button
-                        wire:click="closeExportModal"
-                        class="w-full px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-all duration-200"
-                    >
-                        Tutup
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
 </div>
