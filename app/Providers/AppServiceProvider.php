@@ -27,5 +27,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('view-report', function (User $user) {
             return $user->isOwner();
         });
+        Gate::define('view-users', function (User $user) {
+            return $user->isOwner();
+        });
     }
 }

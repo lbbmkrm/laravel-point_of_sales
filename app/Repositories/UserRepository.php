@@ -3,47 +3,78 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Hash;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\MassAssignmentException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 
 class UserRepository
 {
-    /**
-     * Create a new user.
-     *
-     * @param array<string, mixed> $data
-     * @return \App\Models\User
-     */
+    private User $model;
+
+    public function __construct(User $model)
+    {
+        $this->model = $model;
+    }
+
+    public function all(): Collection
+    {
+        try {
+            return $this->model->all();
+        } catch (QueryException $e) {
+            throw new Exception($e->getMessage(), 500);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
+        }
+    }
+
+    public function getById(int $id): ?User
+    {
+        try {
+            return $this->model->find($id);
+        } catch (ModelNotFoundException $e) {
+            throw new Exception($e->getMessage(), 404);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
+        }
+    }
+
     public function create(array $data): User
     {
         try {
-            return User::create([
-                'name' => $data['name'],
-                'username' => $data['username'],
-                'phone' => $data['phone'],
-                'password' => Hash::make($data['password']),
-            ]);
+            return $this->model->create($data);
+        } catch (QueryException $e) {
+            throw new Exception($e->getMessage(), 500);
         } catch (Exception $e) {
-            throw new Exception('Failed to create user', 500);
+            throw new Exception($e->getMessage(), 500);
         }
     }
-    public function findById(int $id): ?User
+
+    public function update(int $id, array $data): User
     {
         try {
-            $user = User::findOrFail($id);
-            return $user;
-        } catch (ModelNotFoundException $e) {
-            throw new ModelNotFoundException('User not found', 404);
+            $user = $this->getById($id);
+            $user->update($data);
+            return $user->fresh();
+        } catch (MassAssignmentException $e) {
+            throw new Exception($e->getMessage(), 500);
+        } catch (QueryException $e) {
+            throw new Exception($e->getMessage(), 500);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
         }
     }
-    public function findByUsername(string $username): ?User
+
+    public function delete(int $id): bool
     {
         try {
-            $user = User::where('username', $username)->first();
-            return $user;
-        } catch (ModelNotFoundException $e) {
-            throw new ModelNotFoundException('User not found', 404);
+            $user = $this->getById($id);
+            return $user->delete();
+        } catch (QueryException $e) {
+            throw new Exception($e->getMessage(), 500);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
         }
     }
 }

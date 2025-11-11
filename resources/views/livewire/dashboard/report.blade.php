@@ -120,7 +120,7 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
     }
 }; ?>
 
-<div class="space-y-6">
+<div class="p-6 space-y-6">
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Laporan Penjualan</h1>

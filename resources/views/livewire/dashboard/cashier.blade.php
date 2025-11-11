@@ -5,45 +5,48 @@ use Livewire\Attributes\{Layout, Title, Computed, Validate, Url};
 use App\Services\{ProductService, TransactionService};
 use App\Models\Product;
 
-new
-#[Layout('layouts.app')]
-#[Title('Cashier')]
-class extends Component {
+new #[Layout("layouts.app")] #[Title("Cashier")] class extends Component {
     public array $cart = [];
     public bool $showCheckout = false;
     public bool $showSuccess = false;
-    
-    #[Validate('required|numeric|min:0')]
+
+    #[Validate("required|numeric|min:0")]
     public int|float|null $paymentAmount = null;
-    
+
     public ?float $change = null;
     public ?float $successTotal = null;
     public ?float $successPayment = null;
     public ?float $successChange = null;
 
-    #[Url(as: 'q', keep: true)]
-    public string $search = '';
+    #[Url(as: "q", keep: true)]
+    public string $search = "";
 
     #[Computed]
-    public function products() {
-        return Product::where('name', 'like', "%$this->search%")->orderBy('name', 'asc')->get();
+    public function products()
+    {
+        return Product::where("name", "like", "%$this->search%")
+            ->orderBy("name", "asc")
+            ->get();
     }
-    
+
     #[Computed]
     public function subtotal(): float
     {
-        return collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        return collect($this->cart)->sum(
+            fn ($item) => $item["price"] * $item["quantity"],
+        );
     }
 
     #[Computed]
     public function tax(): float
     {
-        return $this->subtotal() * config('services.tax_rate', 0);
+        return $this->subtotal() * config("services.tax_rate", 0);
     }
 
     #[Computed]
-    public function taxRateLabel(): string {
-        $rate = config('services.tax_rate', 0) * 100;
+    public function taxRateLabel(): string
+    {
+        $rate = config("services.tax_rate", 0) * 100;
         return "PPN $rate%";
     }
 
@@ -55,63 +58,68 @@ class extends Component {
 
     public function addToCart($productId): void
     {
-        $product = collect($this->products)->firstWhere('id', $productId);
+        $product = collect($this->products)->firstWhere("id", $productId);
 
-        if (!$product) {
-            session()->flash('error', 'Produk tidak ditemukan.');
+        if (! $product) {
+            session()->flash("error", "Produk tidak ditemukan.");
             return;
         }
 
         if (isset($this->cart[$productId])) {
-            $this->cart[$productId]['quantity']++;
+            $this->cart[$productId]["quantity"]++;
         } else {
             $this->cart[$productId] = [
-                'id' => $product['id'],
-                'name' => $product['name'],
-                'price' => $product['price'],
-                'quantity' => 1,
+                "id" => $product["id"],
+                "name" => $product["name"],
+                "price" => $product["price"],
+                "quantity" => 1,
             ];
         }
 
-        session()->flash('success', "{$product['name']} ditambahkan ke keranjang.");
+        session()->flash(
+            "success",
+            "{$product["name"]} ditambahkan ke keranjang.",
+        );
     }
 
     public function removeFromCart($productId): void
     {
         if (isset($this->cart[$productId])) {
-            $productName = $this->cart[$productId]['name'];
+            $productName = $this->cart[$productId]["name"];
             unset($this->cart[$productId]);
-            session()->flash('success', "$productName dihapus dari keranjang.");
+            session()->flash("success", "$productName dihapus dari keranjang.");
         }
     }
 
     public function clearCart(): void
     {
         $this->cart = [];
-        session()->flash('success', 'Keranjang berhasil dikosongkan.');
+        session()->flash("success", "Keranjang berhasil dikosongkan.");
     }
 
     public function openCheckoutModal(): void
     {
         if (empty($this->cart)) {
-            session()->flash('error', 'Keranjang masih kosong!');
+            session()->flash("error", "Keranjang masih kosong!");
             return;
         }
         $this->showCheckout = true;
     }
 
-    public function closeAndResetModal(): void {
+    public function closeAndResetModal(): void
+    {
         $this->showCheckout = false;
         $this->resetErrorBag();
-        $this->reset('paymentAmount', 'change');
+        $this->reset("paymentAmount", "change");
     }
 
-    public function updatedPaymentAmount($value): void {
+    public function updatedPaymentAmount($value): void
+    {
         if (is_numeric($value) && $value > 0) {
             $this->change = (float) $value - $this->total();
-            $this->resetErrorBag('paymentAmount');
+            $this->resetErrorBag("paymentAmount");
         } else {
-            $this->reset('change');
+            $this->reset("change");
         }
     }
 
@@ -119,22 +127,25 @@ class extends Component {
     {
         $this->paymentAmount = $amount;
         $this->change = (float) $this->paymentAmount - $this->total();
-        $this->resetErrorBag('paymentAmount');
+        $this->resetErrorBag("paymentAmount");
     }
 
     public function setExactAmount(): void
     {
         $this->paymentAmount = ceil($this->total());
         $this->change = (float) $this->paymentAmount - $this->total();
-        $this->resetErrorBag('paymentAmount');
+        $this->resetErrorBag("paymentAmount");
     }
 
     public function checkout(TransactionService $transactionService): void
-    { 
+    {
         $this->validate();
-        
+
         if ($this->paymentAmount < $this->total()) {
-            $this->addError('paymentAmount', 'Uang yang diterima kurang dari total harga.');
+            $this->addError(
+                "paymentAmount",
+                "Uang yang diterima kurang dari total harga.",
+            );
             return;
         }
 
@@ -144,43 +155,56 @@ class extends Component {
             $finalChange = $this->change;
 
             $transaction = $transactionService->createTransaction([
-                'user_id' => auth()->id(),
-                'total_price' => $finalTotal,
-                'total_quantity' => collect($this->cart)->sum('quantity'),
-                'transaction_details' => collect($this->cart)->map(fn($item) => [
-                    'product_id' => $item['id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                ])->toArray(),
-            ]); 
-            
-            $this->reset(['cart', 'paymentAmount', 'change', 'showCheckout']);
+                "user_id" => auth()->id(),
+                "total_price" => $finalTotal,
+                "total_quantity" => collect($this->cart)->sum("quantity"),
+                "transaction_details" => collect($this->cart)
+                    ->map(
+                        fn ($item) => [
+                            "product_id" => $item["id"],
+                            "quantity" => $item["quantity"],
+                            "price" => $item["price"],
+                        ],
+                    )
+                    ->toArray(),
+            ]);
+
+            $this->reset(["cart", "paymentAmount", "change", "showCheckout"]);
             $this->showSuccess = true;
 
             $this->successTotal = $finalTotal;
             $this->successPayment = $finalPaymentAmount;
             $this->successChange = $finalChange;
 
-            session()->flash('success', 'Transaksi berhasil #' . $transaction->id);
-            
+            session()->flash(
+                "success",
+                "Transaksi berhasil #" . $transaction->id,
+            );
         } catch (\Exception $e) {
-            logger()->error('Checkout failed', ['error' => $e->getMessage()]);
-            session()->flash('error', 'Gagal melakukan transaksi: ' . $e->getMessage());
+            logger()->error("Checkout failed", ["error" => $e->getMessage()]);
+            session()->flash(
+                "error",
+                "Gagal melakukan transaksi: " . $e->getMessage(),
+            );
         }
     }
 };
 ?>
 
 <div x-data>
-    @if (session('success'))
-        <div class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
-            {{ session('success') }}
+    @if (session("success"))
+        <div
+            class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm font-medium"
+        >
+            {{ session("success") }}
         </div>
     @endif
 
-    @if (session('error'))
-        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm font-medium">
-            {{ session('error') }}
+    @if (session("error"))
+        <div
+            class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm font-medium"
+        >
+            {{ session("error") }}
         </div>
     @endif
 
@@ -203,14 +227,26 @@ class extends Component {
                         aria-label="Clear search"
                         class="absolute top-0 right-0 h-full px-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <svg
+                            class="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            ></path>
                         </svg>
                     </button>
                 @endif
             </div>
             <!-- Menu Grid -->
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div
+                class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            >
                 @forelse ($this->products as $product)
                     <div
                         wire:click="addToCart({{ $product->id }})"
@@ -218,32 +254,80 @@ class extends Component {
                         wire:target="addToCart({{ $product->id }})"
                         class="menu-item bg-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition-all duration-200 md:p-4 relative"
                     >
-                        <div wire:loading.flex wire:target="addToCart({{ $product->id }})" 
-                             class="absolute inset-0 flex items-center justify-center bg-white/80 rounded-xl z-10">
-                            <svg class="animate-spin h-6 w-6 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <div
+                            wire:loading.flex
+                            wire:target="addToCart({{ $product->id }})"
+                            class="absolute inset-0 flex items-center justify-center bg-white/80 rounded-xl z-10"
+                        >
+                            <svg
+                                class="animate-spin h-6 w-6 text-amber-600"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
                             </svg>
                         </div>
-                        
-                        <div class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3">
-                           <img src="{{ $product->image ?? asset('images/default-coffee-menu.jpg') }}"
-                8              alt="{{ $product->name }}"
-                9              class="w-full h-full object-cover rounded-lg">
+
+                        <div
+                            class="bg-amber-100 rounded-lg h-24 flex items-center justify-center mb-2 md:h-32 md:mb-3"
+                        >
+                            <img
+                                src="{{ $product->image ?? asset("images/default-coffee-menu.jpg") }}"
+                                alt="{{ $product->name }}"
+                                class="w-full h-full object-cover rounded-lg"
+                            />
                         </div>
-                        <h3 class="font-semibold text-gray-800 mb-1 text-sm md:text-base">
+                        <h3
+                            class="font-semibold text-gray-800 mb-1 text-sm md:text-base"
+                        >
                             {{ $product->name }}
                         </h3>
-                        <p class="text-amber-600 font-bold text-sm md:text-base">
-                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                        <p
+                            class="text-amber-600 font-bold text-sm md:text-base"
+                        >
+                            Rp
+                            {{ number_format($product->price, 0, ",", ".") }}
                         </p>
                     </div>
                 @empty
                     <div class="col-span-full text-center py-12">
-                        <div class="flex flex-col items-center justify-center text-gray-500">
-                            <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                            <h3 class="text-xl font-semibold text-gray-700">Produk tidak ditemukan</h3>
-                            <p class="mt-1">Coba gunakan kata kunci lain untuk pencarian Anda.</p>
+                        <div
+                            class="flex flex-col items-center justify-center text-gray-500"
+                        >
+                            <svg
+                                class="w-16 h-16 mb-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                ></path>
+                            </svg>
+                            <h3 class="text-xl font-semibold text-gray-700">
+                                Produk tidak ditemukan
+                            </h3>
+                            <p class="mt-1">
+                                Coba gunakan kata kunci lain untuk pencarian
+                                Anda.
+                            </p>
                         </div>
                     </div>
                 @endforelse
@@ -261,19 +345,26 @@ class extends Component {
             <!-- Cart Items -->
             <div class="flex-1 overflow-y-auto mb-4 md:mb-6">
                 @forelse ($cart as $item)
-                    <div wire:key="{{ $item['id'] }}" class="flex justify-between items-center py-3 border-b last:border-0">
+                    <div
+                        wire:key="{{ $item["id"] }}"
+                        class="flex justify-between items-center py-3 border-b last:border-0"
+                    >
                         <div class="flex-1">
-                            <p class="font-semibold text-gray-800">{{ $item['name'] }}</p>
+                            <p class="font-semibold text-gray-800">
+                                {{ $item["name"] }}
+                            </p>
                             <p class="text-sm text-gray-500">
-                                Qty: {{ $item['quantity'] }} × Rp {{ number_format($item['price'], 0, ',', '.') }}
+                                Qty: {{ $item["quantity"] }} × Rp
+                                {{ number_format($item["price"], 0, ",", ".") }}
                             </p>
                         </div>
                         <div class="text-right ml-4">
                             <p class="font-semibold text-gray-800">
-                                Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                Rp
+                                {{ number_format($item["price"] * $item["quantity"], 0, ",", ".") }}
                             </p>
-                            <button 
-                                wire:click="removeFromCart({{ $item['id'] }})" 
+                            <button
+                                wire:click="removeFromCart({{ $item["id"] }})"
                                 class="text-red-500 cursor-pointer text-xs mt-1 hover:text-red-700 hover:underline transition"
                             >
                                 Hapus
@@ -281,9 +372,21 @@ class extends Component {
                         </div>
                     </div>
                 @empty
-                    <div class="flex flex-col items-center justify-center py-12 text-gray-400">
-                        <svg class="w-16 h-16 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    <div
+                        class="flex flex-col items-center justify-center py-12 text-gray-400"
+                    >
+                        <svg
+                            class="w-16 h-16 mb-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                            ></path>
                         </svg>
                         <p class="font-medium">Belum ada pesanan</p>
                         <p class="text-sm mt-1">Pilih menu untuk memulai</p>
@@ -295,15 +398,23 @@ class extends Component {
             <div class="border-t pt-4 space-y-3">
                 <div class="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>Rp {{ number_format($this->subtotal, 0, ',', '.') }}</span>
+                    <span>
+                        Rp {{ number_format($this->subtotal, 0, ",", ".") }}
+                    </span>
                 </div>
                 <div class="flex justify-between text-gray-600">
-                    <span>{{$this->taxRateLabel}}</span>
-                    <span>Rp {{ number_format($this->tax, 0, ',', '.') }}</span>
+                    <span>{{ $this->taxRateLabel }}</span>
+                    <span>
+                        Rp {{ number_format($this->tax, 0, ",", ".") }}
+                    </span>
                 </div>
-                <div class="flex justify-between text-lg font-bold text-gray-800 border-t pt-3">
+                <div
+                    class="flex justify-between text-lg font-bold text-gray-800 border-t pt-3"
+                >
                     <span>Total</span>
-                    <span>Rp {{ number_format($this->total, 0, ',', '.') }}</span>
+                    <span>
+                        Rp {{ number_format($this->total, 0, ",", ".") }}
+                    </span>
                 </div>
             </div>
 
@@ -328,7 +439,7 @@ class extends Component {
     </div>
 
     <!-- Checkout Modal -->
-    <div 
+    <div
         x-show="$wire.showCheckout"
         x-cloak
         x-transition:enter="transition ease-out duration-300"
@@ -342,7 +453,7 @@ class extends Component {
         aria-labelledby="checkout-title"
         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
     >
-        <div 
+        <div
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -355,27 +466,49 @@ class extends Component {
                 <h3 id="checkout-title" class="text-xl font-bold text-gray-800">
                     Konfirmasi Pembayaran
                 </h3>
-                <button 
-                    wire:click="closeAndResetModal" 
+                <button
+                    wire:click="closeAndResetModal"
                     aria-label="Tutup modal"
                     class="text-gray-400 cursor-pointer hover:text-gray-600 transition"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        ></path>
                     </svg>
                 </button>
             </div>
 
-            @if($errors->has('checkout'))
-                <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4 rounded">
+            @if ($errors->has("checkout"))
+                <div
+                    class="bg-red-50 border-l-4 border-red-400 p-4 mb-4 rounded"
+                >
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            <svg
+                                class="h-5 w-5 text-red-400"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd"
+                                />
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm text-red-700">{{ $errors->first('checkout') }}</p>
+                            <p class="text-sm text-red-700">
+                                {{ $errors->first("checkout") }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -384,20 +517,33 @@ class extends Component {
             <div class="bg-amber-50 rounded-lg p-4 mb-6">
                 <div class="flex justify-between mb-2">
                     <span class="text-gray-600">Subtotal:</span>
-                    <span class="font-semibold">Rp {{ number_format($this->subtotal, 0, ',', '.') }}</span>
+                    <span class="font-semibold">
+                        Rp {{ number_format($this->subtotal, 0, ",", ".") }}
+                    </span>
                 </div>
                 <div class="flex justify-between mb-2">
-                    <span class="text-gray-600">{{$this->taxRateLabel}}</span>
-                    <span class="font-semibold">Rp {{ number_format($this->tax, 0, ',', '.') }}</span>
+                    <span class="text-gray-600">
+                        {{ $this->taxRateLabel }}
+                    </span>
+                    <span class="font-semibold">
+                        Rp {{ number_format($this->tax, 0, ",", ".") }}
+                    </span>
                 </div>
-                <div class="flex justify-between text-lg font-bold text-amber-600 border-t border-amber-200 pt-2 mt-2">
+                <div
+                    class="flex justify-between text-lg font-bold text-amber-600 border-t border-amber-200 pt-2 mt-2"
+                >
                     <span>Total Bayar:</span>
-                    <span>Rp {{ number_format($this->total, 0, ',', '.') }}</span>
+                    <span>
+                        Rp {{ number_format($this->total, 0, ",", ".") }}
+                    </span>
                 </div>
             </div>
 
             <div class="mb-4">
-                <label for="paymentAmount" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label
+                    for="paymentAmount"
+                    class="block text-sm font-semibold text-gray-700 mb-2"
+                >
                     Jumlah Uang Diterima
                 </label>
                 <input
@@ -405,66 +551,76 @@ class extends Component {
                     type="number"
                     wire:model.live.debounce.1000ms="paymentAmount"
                     @class([
-                        'w-full px-4 py-3 border-2 rounded-lg focus:outline-none text-lg transition',
-                        'border-red-300 focus:border-red-500' => $errors->has('paymentAmount'),
-                        'border-gray-300 focus:border-amber-500' => !$errors->has('paymentAmount'),
+                        "w-full px-4 py-3 border-2 rounded-lg focus:outline-none text-lg transition",
+                        "border-red-300 focus:border-red-500" => $errors->has("paymentAmount"),
+                        "border-gray-300 focus:border-amber-500" => ! $errors->has("paymentAmount"),
                     ])
                     placeholder="Masukkan jumlah"
                     min="0"
                     step="1000"
                 />
-                @error('paymentAmount')
+                @error("paymentAmount")
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
 
-            @if($change !== null && $change >= 0)
-                <div class="bg-green-50 rounded-lg p-3 border-2 border-green-200 mb-4">
+            @if ($change !== null && $change >= 0)
+                <div
+                    class="bg-green-50 rounded-lg p-3 border-2 border-green-200 mb-4"
+                >
                     <div class="flex justify-between items-center">
-                        <span class="text-gray-700 font-semibold">Kembalian:</span>
+                        <span class="text-gray-700 font-semibold">
+                            Kembalian:
+                        </span>
                         <span class="text-xl font-bold text-green-600">
-                            Rp {{ number_format($change, 0, ',', '.') }}
+                            Rp {{ number_format($change, 0, ",", ".") }}
                         </span>
                     </div>
                 </div>
-            @elseif($paymentAmount && $change < 0)
-                <div class="bg-red-50 rounded-lg p-3 border-2 border-red-200 mb-4">
+            @elseif ($paymentAmount && $change !== null && $change < 0)
+                <div
+                    class="bg-red-50 rounded-lg p-3 border-2 border-red-200 mb-4"
+                >
                     <p class="text-red-600 font-semibold text-center">
-                        Uang tidak cukup! Kurang Rp {{ number_format(abs($change), 0, ',', '.') }}
+                        Uang tidak cukup! Kurang Rp
+                        {{ number_format(abs($change ?? 0), 0, ",", ".") }}
                     </p>
                 </div>
             @endif
 
             <div class="grid grid-cols-3 gap-2 mb-6">
-                <button 
+                <button
                     type="button"
-                    wire:click="setQuickAmount(50000)" 
+                    wire:click="setQuickAmount(50000)"
                     @class([
-                        'px-3 py-2 cursor-pointer rounded-lg font-semibold text-sm transition',
-                        'bg-amber-100 border-2 border-amber-500 text-amber-700' => $paymentAmount == 50000,
-                        'bg-gray-100 hover:bg-gray-200' => $paymentAmount != 50000,
+                        "px-3 py-2 cursor-pointer rounded-lg font-semibold text-sm transition",
+                        "bg-amber-100 border-2 border-amber-500 text-amber-700" =>
+                            $paymentAmount == 50000,
+                        "bg-gray-100 hover:bg-gray-200" => $paymentAmount != 50000,
                     ])
                 >
                     50k
                 </button>
-                <button 
+                <button
                     type="button"
-                    wire:click="setQuickAmount(100000)" 
+                    wire:click="setQuickAmount(100000)"
                     @class([
-                        'px-3 py-2 cursor-pointer rounded-lg font-semibold text-sm transition',
-                        'bg-amber-100 border-2 border-amber-500 text-amber-700' => $paymentAmount == 100000,
-                        'bg-gray-100 hover:bg-gray-200' => $paymentAmount != 100000,
+                        "px-3 py-2 cursor-pointer rounded-lg font-semibold text-sm transition",
+                        "bg-amber-100 border-2 border-amber-500 text-amber-700" =>
+                            $paymentAmount == 100000,
+                        "bg-gray-100 hover:bg-gray-200" => $paymentAmount != 100000,
                     ])
                 >
                     100k
                 </button>
-                <button 
+                <button
                     type="button"
-                    wire:click="setExactAmount" 
+                    wire:click="setExactAmount"
                     @class([
-                        'px-3 py-2 cursor-pointer rounded-lg font-semibold text-sm transition',
-                        'bg-amber-100 border-2 border-amber-500 text-amber-700' => $paymentAmount == ceil($this->total),
-                        'bg-gray-100 hover:bg-gray-200' => $paymentAmount != ceil($this->total),
+                        "px-3 py-2 cursor-pointer rounded-lg font-semibold text-sm transition",
+                        "bg-amber-100 border-2 border-amber-500 text-amber-700" =>
+                            $paymentAmount == ceil($this->total),
+                        "bg-gray-100 hover:bg-gray-200" => $paymentAmount != ceil($this->total),
                     ])
                 >
                     Pas
@@ -477,18 +633,40 @@ class extends Component {
                 wire:loading.class="opacity-75 cursor-wait"
                 @disabled($paymentAmount === null || ($change !== null && $change < 0))
                 @class([
-                    'w-full py-3 rounded-lg cursor-pointer font-semibold transition relative',
-                    'bg-green-500 text-white hover:bg-green-600' => $paymentAmount !== null && ($change === null || $change >= 0),
-                    'bg-gray-300 text-gray-500 cursor-not-allowed' => $paymentAmount === null || ($change !== null && $change < 0),
+                    "w-full py-3 rounded-lg cursor-pointer font-semibold transition relative",
+                    "bg-green-500 text-white hover:bg-green-600" =>
+                        $paymentAmount !== null && ($change === null || $change >= 0),
+                    "bg-gray-300 text-gray-500 cursor-not-allowed" =>
+                        $paymentAmount === null || ($change !== null && $change < 0),
                 ])
             >
                 <span wire:loading.remove wire:target="checkout">
                     Konfirmasi Pembayaran
                 </span>
-                <span wire:loading wire:target="checkout" class="flex items-center justify-center">
-                    <svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <span
+                    wire:loading
+                    wire:target="checkout"
+                    class="flex items-center justify-center"
+                >
+                    <svg
+                        class="animate-spin h-5 w-5 mr-2"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                     </svg>
                     Memproses...
                 </span>
@@ -497,7 +675,7 @@ class extends Component {
     </div>
 
     <!-- Success Modal -->
-    <div 
+    <div
         x-show="$wire.showSuccess"
         x-cloak
         x-transition:enter="transition ease-out duration-300"
@@ -511,7 +689,7 @@ class extends Component {
         aria-labelledby="success-title"
         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
     >
-        <div 
+        <div
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -520,12 +698,27 @@ class extends Component {
             x-transition:leave-end="opacity-0 scale-95"
             class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl text-center md:p-8"
         >
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 md:w-20 md:h-20">
-                <svg class="w-8 h-8 text-green-500 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            <div
+                class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 md:w-20 md:h-20"
+            >
+                <svg
+                    class="w-8 h-8 text-green-500 md:w-10 md:h-10"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                    ></path>
                 </svg>
             </div>
-            <h3 id="success-title" class="text-xl font-bold text-gray-800 mb-2 md:text-2xl">
+            <h3
+                id="success-title"
+                class="text-xl font-bold text-gray-800 mb-2 md:text-2xl"
+            >
                 Pembayaran Berhasil!
             </h3>
             <p class="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">
@@ -535,23 +728,34 @@ class extends Component {
             <div class="bg-gray-50 rounded-lg p-3 mb-4 md:p-4 md:mb-6">
                 <div class="flex justify-between mb-2 text-sm md:text-base">
                     <span class="text-gray-600">Total:</span>
-                    <span class="font-bold">Rp {{ number_format($this->successTotal, 0, ',', '.') }}</span>
+                    <span class="font-bold">
+                        Rp
+                        {{ number_format($this->successTotal, 0, ",", ".") }}
+                    </span>
                 </div>
                 <div class="flex justify-between mb-2 text-sm md:text-base">
                     <span class="text-gray-600">Dibayar:</span>
-                    <span class="font-bold">Rp {{ number_format($this->successPayment, 0, ',', '.') }}</span>
+                    <span class="font-bold">
+                        Rp
+                        {{ number_format($this->successPayment, 0, ",", ".") }}
+                    </span>
                 </div>
-                <div class="flex justify-between text-green-600 font-bold text-sm md:text-base">
+                <div
+                    class="flex justify-between text-green-600 font-bold text-sm md:text-base"
+                >
                     <span>Kembalian:</span>
-                    <span>Rp {{ number_format($successChange ?? 0, 0, ',', '.') }}</span>
+                    <span>
+                        Rp
+                        {{ number_format($successChange ?? 0, 0, ",", ".") }}
+                    </span>
                 </div>
             </div>
 
-             <button 
-                    wire:click="$set('showSuccess', false)" 
-                    aria-label="Tutup modal"
-                    class="text-gray-400 cursor-pointer hover:text-gray-600 transition"
-                >
+            <button
+                wire:click="$set('showSuccess', false)"
+                aria-label="Tutup modal"
+                class="text-gray-400 cursor-pointer hover:text-gray-600 transition"
+            >
                 Selesai
             </button>
         </div>
