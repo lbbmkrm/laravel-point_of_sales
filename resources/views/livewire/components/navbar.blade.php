@@ -142,7 +142,8 @@ new class extends Component {
                         </a>
 
                         <a
-                            href="#"
+                            href="{{ route("settings") }}"
+                            wire:navigate
                             class="cursor-pointer group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150"
                         >
                             <svg

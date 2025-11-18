@@ -2,90 +2,172 @@
 
 ---
 
-### 1. Judul Penelitian yang Diajukan
+## 1. Judul Penelitian
 
-**IMPLEMENTASI TALL STACK UNTUK SISTEM POINT OF SALES TERINTEGRASI LANDING PAGE: ANALISIS EFISIENSI OPERASIONAL DAN EFISIENSI PENGEMBANGAN (Studi Kasus: QIA RONGKU COFFEE, MEDAN)**
+**IMPLEMENTASI TALL STACK UNTUK SISTEM POINT OF SALES TERINTEGRASI LANDING PAGE:  
+ANALISIS EFISIENSI OPERASIONAL DAN EFISIENSI PENGEMBANGAN  
+(Studi Kasus: QIA RONGKU COFFEE, MEDAN)**
 
 ---
 
-### 2. Pendahuluan (Latar Belakang Masalah)
+## 2. Pendahuluan (Latar Belakang Masalah)
 
 Di era digital, keberhasilan UMKM seperti kedai kopi tidak hanya bergantung pada kualitas produk, tetapi juga pada efisiensi operasional dan citra profesional. Di sisi lain, pengembang perangkat lunak, terutama yang bekerja dengan sumber daya terbatas (misalnya, pengembang tunggal atau tim kecil), juga menghadapi tantangan efisiensi pengembangan.
 
-Studi kasus pada **QIA RONGKU COFFEE, Medan** (sebuah entitas nyata), merepresentasikan gabungan dari tantangan-tantangan yang akan menjadi fokus analisis kuantitatif dalam penelitian ini:
+Studi kasus pada **QIA RONGKU COFFEE, Medan** merepresentasikan gabungan dari tantangan yang menjadi fokus analisis dalam penelitian ini:
 
-1.  **Tantangan Kredibilitas Digital (Masalah Bisnis):** Kehadiran online yang profesional adalah kunci. Ketergantungan pada media sosial untuk pembaruan menu sering menimbulkan **inkonsistensi data** yang terobservasi, merusak citra profesional usaha dan menjadi metrik _baseline_ yang akan diukur.
-2.  **Tantangan Efisiensi Operasional (Masalah Bisnis):** Proses transaksi manual **terobservasi** menghambat kecepatan layanan dan memiliki risiko tinggi terhadap kesalahan pencatatan. Penelitian ini akan mengukur waktu rata-rata pemrosesan transaksi manual sebagai _baseline_ operasional.
-3.  **Tantangan Efisiensi Pengembangan (Masalah Teknis):** Kebutuhan untuk membangun aplikasi web yang modern dan reaktif seringkali menuntut pengembang untuk mengelola basis kode terpisah (API _backend_ dan SPA _frontend_), yang memperlambat proses pengembangan dan meningkatkan kompleksitas. Penelitian ini berhipotesis TALL Stack dapat memitigasi masalah _context switching_ ini.
+1. **Tantangan Kredibilitas Digital (Masalah Bisnis):**  
+   Ketergantungan pada media sosial untuk pembaruan menu memicu **inkonsistensi data**, merusak citra profesional usaha.
 
-Untuk menjawab ketiga tantangan tersebut, penelitian ini mengusulkan **implementasi arsitektur TALL Stack** untuk membangun sebuah sistem terpadu yang tidak hanya menyelesaikan masalah bisnis UMKM melalui data _real-time_, tetapi juga membuktikan efektivitas pendekatan pengembangan yang lebih ramping dan efisien.
+2. **Tantangan Efisiensi Operasional (Masalah Bisnis):**  
+   Proses transaksi manual **terobservasi** menghambat kecepatan layanan dan meningkatkan risiko kesalahan pencatatan.
 
----
+3. **Tantangan Efisiensi Pengembangan (Masalah Teknis):**  
+   Pengembangan aplikasi modern sering menuntut pemeliharaan basis kode terpisah (API backend dan SPA frontend), meningkatkan kompleksitas dan _context switching_.
 
-### 3. Rumusan Masalah Penelitian
-
-Penelitian ini akan menjawab pertanyaan-pertanyaan berikut dengan basis data empiris:
-
-1.  Bagaimana merancang dan mengimplementasikan sebuah aplikasi POS terintegrasi _landing page_ yang fungsional menggunakan arsitektur TALL Stack?
-2.  Bagaimana **pengaruh** sistem yang dibangun terhadap **peningkatan efisiensi operasional** (diukur dari reduksi waktu transaksi) dan **kredibilitas digital** (diukur dari tingkat konsistensi data menu) di QIA RONGKU COFFEE?
-3.  Melalui analisis komparatif alur kerja, sejauh mana **arsitektur TALL Stack** berkontribusi pada **efisiensi proses pengembangan** dan kemudahan pemeliharaan sistem dalam konteks _solo developer_ dibandingkan pendekatan _stack_ terpisah?
+Penelitian ini mengusulkan **TALL Stack** sebagai arsitektur terpadu untuk membangun sebuah sistem POS terintegrasi landing page yang mampu mengatasi masalah-masalah tersebut.
 
 ---
 
-### 4. Ruang Lingkup dan Batasan Proyek
+## 3. Rumusan Masalah Penelitian
 
-Untuk menjaga fokus penelitian, proyek ini dibatasi pada aspek-aspek berikut:
-
-1.  **Studi Kasus:** Sistem dirancang berdasarkan alur kerja **NYATA** dan kebutuhan yang diobservasi pada **QIA RONGKU COFFEE, Medan**. Pengambilan data _baseline_ (manual) dan data evaluasi (sistem baru) akan dilakukan di lokasi ini.
-2.  **Platform:** Sistem dikembangkan sebagai Aplikasi Berbasis Web. Tidak ada pengembangan aplikasi _native mobile_.
-3.  **Teknologi:** Penelitian ini secara spesifik menganalisis dan mengimplementasikan **TALL Stack** (Tailwind CSS, Alpine.js, Laravel, Livewire) sebagai arsitektur utama.
-4.  **Fitur Inti:** Pengembangan difokuskan pada **Modul Transaksi (Kasir), Manajemen Produk (Menu), Laporan Penjualan Dasar, dan sebuah Landing Page Publik** untuk profil dan menu usaha.
-5.  **Fungsionalitas Landing Page:** _Landing page_ berfungsi sebagai etalase digital dan **tidak mencakup fungsionalitas pemesanan _online_**.
+1. Bagaimana merancang dan mengimplementasikan aplikasi POS terintegrasi landing page menggunakan arsitektur TALL Stack?
+2. Bagaimana pengaruh sistem terhadap **efisiensi operasional** dan **kredibilitas digital** di QIA RONGKU COFFEE?
+3. Sejauh mana arsitektur TALL Stack berkontribusi pada **efisiensi pengembangan** dalam konteks solo developer?
 
 ---
 
-### 5. Metodologi Penelitian dan Pengembangan
+## 4. Tujuan Penelitian
 
-Proyek ini menggunakan kombinasi metodologi pengembangan sistem (_Agile_) dan metodologi penelitian ilmiah (_Mixed Method_).
-
-**a. Metodologi Pengembangan Sistem (Agile Scrum Adaptif):**
-Metodologi Agile dipilih karena fleksibilitasnya. Pendekatan iteratif memungkinkan pengembangan fitur secara berkala, memastikan kemajuan yang terukur. Kerangka kerja Scrum diadaptasi untuk pengembang tunggal.
-
-| Tahap Siklus Sprint           | Deskripsi Aktivitas Utama                                                                                                                 | Luaran (Output)                                        |
-| :---------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- |
-| **1. Perencanaan (Planning)** | Mendefinisikan **Product Backlog**. Memilih item prioritas untuk dikerjakan dalam satu **Sprint** menjadi **Sprint Backlog**.             | Product Backlog, Sprint Backlog.                       |
-| **2. Desain & Analisis**      | Melakukan perancangan teknis, termasuk skema database (ERD) dan _wireframing_ UI/UX.                                                      | Skema Database (ERD), Desain Antarmuka (UI/UX Mockup). |
-| **3. Implementasi (Coding)**  | Menulis kode menggunakan **TALL Stack** untuk membangun komponen Livewire dan fitur-fitur lainnya.                                        | Potongan Aplikasi yang Fungsional (_Increment_).       |
-| **4. Pengujian & Evaluasi**   | Melakukan pengujian fungsional dan mengevaluasi hasil sprint, termasuk analisis terhadap efektivitas TALL Stack dalam implementasi fitur. | Laporan Hasil Pengujian, Catatan Evaluasi Sprint.      |
-
-**b. Metodologi Penelitian dan Evaluasi (Mixed Method):**
-
-Untuk menjawab Rumusan Masalah #2 dan #3, penelitian ini menggunakan pendekatan **kuantitatif** dan **kualitatif** sebagai berikut:
-
-| Rumusan Masalah                 | Metode Pengumpulan Data                                                                                                                       | Metrik Kunci yang Diukur                                                                          |
-| :------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ |
-| **Efisiensi Operasional (R2)**  | **Observasi Terstruktur:** Pengukuran _real-time_ menggunakan _stopwatch_ pada alur kerja manual (_baseline_) dan alur kerja sistem TALL POS. | **Reduksi Waktu Transaksi Rata-rata** (Detik), Tingkat Akurasi Pencatatan (Error Rate).           |
-| **Kredibilitas Digital (R2)**   | **Audit Data _Baseline_**: Analisis perbandingan antara menu POS dan _landing page_ terintegrasi.                                             | **Tingkat Konsistensi Data Menu** ($0\%$ inkonsisten).                                            |
-| **Efisiensi Pengembangan (R3)** | **Analisis Komparatif Alur Kerja dan _Self-Documentation_**: Pencatatan waktu dan alur kerja yang dihabiskan untuk pengembangan fitur kunci.  | **Reduksi _Context Switching_**, Waktu Pengembangan Fitur (CRUD), dan Analisis Kompleksitas Kode. |
-
-**c. Justifikasi Pemilihan Arsitektur TALL Stack:**
-Pemilihan TALL Stack merupakan inti hipotesis teknis. Arsitektur ini dipilih sebagai solusi potensial untuk **tantangan efisiensi pengembangan** dengan argumen sebagai berikut:
-
-- **Pendekatan Terpadu (Unified Approach):** Memungkinkan pengembangan antarmuka reaktif tanpa _separated codebase_. Ini secara langsung mengurangi beban kognitif dan _context switching_ antar bahasa/framework (PHP dan JS) yang akan dianalisis dalam penelitian ini.
-- **Kecepatan Pengembangan (Rapid Development):** Komponen Livewire memungkinkan logika _frontend_ dan _backend_ berada di dalam satu kelas PHP, mempercepat proses pembuatan fitur CRUD dan interaksi pengguna lainnya.
+1. Mengimplementasikan sistem POS terintegrasi landing page berbasis TALL Stack.
+2. Menganalisis peningkatan efisiensi operasional setelah menggunakan sistem.
+3. Mengevaluasi efisiensi pengembangan menggunakan arsitektur TALL Stack.
+4. Menyajikan bukti empiris mengenai konsistensi data menu sebagai indikator kredibilitas digital.
 
 ---
 
-### 6. Arsitektur dan Fitur Unggulan
+## 5. Manfaat Penelitian
 
-**a. Arsitektur Sistem Berbasis TALL Stack:**
-Arsitektur ini menghilangkan lapisan API perantara, sehingga menyederhanakan alur kerja _developer_. Komponen Livewire menangani _rendering_ sisi server dan pembaruan DOM cerdas di sisi klien, sementara Alpine.js digunakan untuk interaktivitas kecil _client-side_.
+### a. Manfaat Teoritis
 
-**b. Fitur Fungsional Utama (Sebagai Bukti Konsep):**
+- Menambah literatur terkait implementasi arsitektur TALL Stack dalam pengembangan sistem informasi.
+- Memberikan pendekatan penelitian baru untuk mengukur _development efficiency_ dalam arsitektur terpadu.
+- Menjadi referensi bagi peneliti sistem POS modern.
 
-1.  **Sistem POS Internal (Solusi Efisiensi Operasional):**
-    - **Manajemen Produk & Modul Kasir:** Dikembangkan dengan komponen Livewire untuk menunjukkan kecepatan pengembangan dan pengalaman pengguna yang reaktif (sebagai data kuantitatif efisiensi).
-2.  **Landing Page Publik (Solusi Kredibilitas Digital):**
-    - **Menu Digital yang Selalu Konsisten:** Fitur unggulan di mana data menu diambil secara _real-time_ dari _database_ yang sama dengan sistem POS. Fitur ini menjadi bukti solusi masalah inkonsistensi data.
+### b. Manfaat Praktis
+
+- Membantu UMKM meningkatkan efisiensi operasional dan kredibilitas digital.
+- Menyediakan panduan bagi pengembang tunggal atau tim kecil untuk mengurangi kompleksitas pengembangan.
+- Memberikan bukti valid terkait perbandingan alur kerja tradisional vs TALL Stack.
+
+---
+
+## 6. Ruang Lingkup dan Batasan Penelitian
+
+1. **Studi Kasus:** Fokus pada alur kerja dan kebutuhan nyata QIA RONGKU COFFEE, Medan.
+2. **Platform:** Aplikasi berbasis web; tidak mencakup aplikasi mobile native.
+3. **Teknologi:** Menggunakan TALL Stack (TailwindCSS, Alpine.js, Laravel, Livewire).
+4. **Fitur Inti:** Modul Transaksi, Manajemen Produk, Laporan Penjualan dasar, dan Landing Page Publik.
+5. **Landing Page:** Tidak mencakup fitur pemesanan online.
+
+---
+
+## 7. Tinjauan Pustaka
+
+### 7.1. Sistem Point of Sales UMKM
+
+Penelitian menunjukkan sistem POS mampu meningkatkan kecepatan dan akurasi transaksi (Rahmawati, 2021; Nugroho, 2020).
+
+### 7.2. Landing Page dan Kredibilitas Digital
+
+Konsistensi informasi digital memiliki pengaruh langsung terhadap persepsi profesionalisme (Kotler & Keller, 2020).
+
+### 7.3. Arsitektur Terpadu (Server-Driven UI)
+
+Laravel Livewire dan arsitektur sejenis mempercepat pengembangan dengan mengurangi _context switching_ (Otwell, 2020; Toland, 2021).
+
+### 7.4. TALL Stack
+
+Literatur tentang TALL Stack masih jarang, khususnya dalam konteks UMKM atau pengukuran kuantitatif.
+
+---
+
+## 8. State of The Art dan Gap Research
+
+### 8.1. State of The Art
+
+| Bidang Penelitian     | Fokus                | Temuan                                         | Keterbatasan                                        |
+| --------------------- | -------------------- | ---------------------------------------------- | --------------------------------------------------- |
+| POS UMKM              | Efisiensi transaksi  | Mengurangi human error                         | Tidak terintegrasi dengan landing page              |
+| Landing Page UMKM     | Kredibilitas digital | Konsistensi informasi meningkatkan kepercayaan | Tidak terhubung data real-time                      |
+| Laravel + Livewire    | Efisiensi CRUD       | Mempercepat prototyping                        | Tidak diuji dalam konteks POS nyata                 |
+| Fullstack tradisional | SPA + API            | Modern, modular                                | Kompleks & berat untuk solo developer               |
+| Studi TALL Stack      | Tutorial teknis      | CRUD cepat                                     | Minim penelitian ilmiah, tanpa evaluasi kuantitatif |
+
+---
+
+### 8.2. Gap Research (Celah Penelitian)
+
+**Gap 1:**  
+Belum ada penelitian yang mengimplementasikan **sistem POS terintegrasi landing page** dengan _data real-time_ dari satu sumber yang sama.
+
+**Gap 2:**  
+Tidak ada penelitian yang mengukur **efisiensi pengembangan** TALL Stack secara kuantitatif dari sisi _context switching_, jumlah file, dan waktu pengembangan.
+
+**Gap 3:**  
+Belum ada penelitian TALL Stack yang memadukan **analisis operasional (waktu transaksi)** dan **analisis teknis (efisiensi pengembangan)** secara simultan.
+
+**Kontribusi penelitian ini:**  
+Mengisi tiga celah tersebut dengan pendekatan implementatif + analisis kuantitatif.
+
+---
+
+## 9. Metodologi Penelitian dan Pengembangan
+
+### 9.1. Metodologi Pengembangan (Agile Scrum Adaptif)
+
+| Tahap                | Deskripsi                                   | Output          |
+| -------------------- | ------------------------------------------- | --------------- |
+| Planning             | Menentukan product backlog & sprint backlog | Backlog         |
+| Desain & Analisis    | ERD, UI/UX, workflow                        | Mockup & ERD    |
+| Implementasi         | Pengembangan komponen TALL Stack            | Increment       |
+| Pengujian & Evaluasi | Testing fungsional, validasi efisiensi      | Laporan         |
+| Deployment           | Implementasi internal                       | Sistem berjalan |
+
+---
+
+### 9.2. Metodologi Penelitian (Mixed Method)
+
+| Rumusan Masalah        | Metode                               | Metrik                              |
+| ---------------------- | ------------------------------------ | ----------------------------------- |
+| Efisiensi Operasional  | Stopwatch transaksi manual vs sistem | Rata-rata waktu (detik), error rate |
+| Kredibilitas Digital   | Audit cross-data                     | Tingkat konsistensi data            |
+| Efisiensi Pengembangan | Pencatatan alur kerja developer      | Waktu CRUD, file, context switching |
+
+---
+
+## 10. Jadwal Penelitian (Gantt Chart)
+
+| Kegiatan           | M1-2 | M3-4 | M5-6 | M7-8 | M9-10 | M11 |
+| ------------------ | ---- | ---- | ---- | ---- | ----- | --- |
+| Studi Literatur    | ✔️   |      |      |      |       |     |
+| Desain Sistem      | ✔️   | ✔️   |      |      |       |     |
+| Implementasi       |      | ✔️   | ✔️   |      |       |     |
+| Pengujian          |      |      | ✔️   | ✔️   |       |     |
+| Analisis Hasil     |      |      |      | ✔️   | ✔️    |     |
+| Penulisan Proposal |      |      |      |      | ✔️    | ✔️  |
+
+---
+
+## 11. Daftar Pustaka
+
+_(Placeholder – dapat Anda ganti dengan jurnal resmi)_
+
+- Kotler, P., & Keller, K. (2020). _Marketing Management_.
+- Otwell, T. (2020). Laravel & Livewire Documentation.
+- Nugroho, A. (2020). Analisis Efektivitas POS UMKM.
+- Rahmawati, S. (2021). Pengaruh POS terhadap Proses Bisnis UMKM.
+- Arifianto, D. (2022). Kredibilitas Digital UMKM di Era Modern.
+- Toland, C. (2021). Server-Driven UI Approaches in Web Development.
 
 ---
