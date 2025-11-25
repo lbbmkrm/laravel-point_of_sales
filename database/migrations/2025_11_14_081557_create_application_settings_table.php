@@ -13,16 +13,6 @@ return new class extends Migration
     {
         Schema::create('application_settings', function (Blueprint $table) {
             $table->id();
-            // Shop Information
-            $table->string('shop_name');
-            $table->string('shop_logo')->nullable();
-            $table->string('shop_address');
-            $table->string('shop_phone');
-            $table->string('shop_email');
-            $table->string('shop_instagram')->nullable();
-            $table->string('shop_facebook')->nullable();
-            $table->string('shop_website')->nullable();
-
             // Cashier Settings
             $table->string('currency', 10)->default('IDR');
             $table->string('currency_symbol', 10)->default('Rp');
@@ -31,12 +21,6 @@ return new class extends Migration
             $table->string('tax_label', 50)->default('PPN');
             $table->boolean('service_charge_enabled')->default(false);
             $table->decimal('service_charge_rate', 5, 4)->default(0);
-
-            // Landing Page Settings
-            $table->text('landing_description')->nullable();
-            $table->string('operating_hours')->default('00:00 - 00:00');
-            $table->string('operating_days')->default('Day, - Day');
-            $table->string('google_maps_url')->nullable();
 
             // System Settings
             $table->string('timezone')->default('Asia/Jakarta');

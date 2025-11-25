@@ -41,13 +41,6 @@ class ApplicationSettingRepository
             return $this->model->firstOrCreate(
                 ['id' => 1],
                 [
-                    'shop_name' => 'Qio Coffee',
-                    'shop_address' => 'Jl. Gatot Subroto, Medan',
-                    'shop_phone' => '0812-3456-7890',
-                    'shop_email' => 'hello@qiocoffee.com',
-                    'shop_instagram' => '@qiocoffee',
-                    'shop_facebook' => 'Qio Coffee Official',
-                    'shop_website' => 'www.qiocoffee.com',
                     'currency' => 'IDR',
                     'currency_symbol' => 'Rp',
                     'tax_enabled' => true,
@@ -55,9 +48,6 @@ class ApplicationSettingRepository
                     'tax_label' => 'PPN',
                     'service_charge_enabled' => false,
                     'service_charge_rate' => 0.05,
-                    'landing_description' => 'Kedai kopi modern dengan suasana nyaman dan berbagai pilihan kopi terbaik di Bandung.',
-                    'operating_hours' => '08:00 - 22:00',
-                    'operating_days' => 'Senin - Minggu',
                     'timezone' => 'Asia/Jakarta',
                     'date_format' => 'd/m/Y',
                     'time_format' => 'H:i',

@@ -4,9 +4,12 @@ use Livewire\Volt\Component;
 use Livewire\Attributes\{Layout, Title, Validate};
 use App\Models\ApplicationSetting;
 use App\Services\ApplicationSettingService;
+use App\Models\ShopProfile;
+use App\Services\ShopProfileService;
 
 new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
     protected ?ApplicationSetting $settings = null;
+    protected ?ShopProfile $shopProfile = null;
 
     // Shop Information
     #[Validate("required|string|max:255")]
@@ -29,8 +32,8 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
     #[Validate("nullable|string|max:255")]
     public ?string $shopFacebook = null;
 
-    #[Validate("nullable|url|max:255")]
-    public ?string $shopWebsite = null;
+    #[Validate("nullable|string|max:255")]
+    public ?string $shopTiktok = null;
 
     // Cashier Settings
     #[Validate("required|string|max:10")]
@@ -72,41 +75,43 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
 
     public function mount(
         ApplicationSettingService $applicationSettingService,
+        ShopProfileService $shopProfileService,
     ): void {
         $this->settings = $applicationSettingService->getSettings();
-        $this->loadSettings();
+        $this->shopProfile = $shopProfileService->getShopProfile();
+        $this->loadData();
     }
 
-    private function loadSettings(): void
+    private function loadData(): void
     {
-        if (! $this->settings) {
+        if (! $this->settings || ! $this->shopProfile) {
             return;
         }
 
         // Shop Information
-        $this->shopLogo = $this->settings->shop_logo;
-        $this->shopName = $this->settings->shop_name;
-        $this->shopAddress = $this->settings->shop_address;
-        $this->shopPhone = $this->settings->shop_phone;
-        $this->shopEmail = $this->settings->shop_email;
-        $this->shopInstagram = $this->settings->shop_instagram;
-        $this->shopFacebook = $this->settings->shop_facebook;
-        $this->shopWebsite = $this->settings->shop_website;
+        $this->shopLogo = $this->shopProfile->logo;
+        $this->shopName = $this->shopProfile->name;
+        $this->shopAddress = $this->shopProfile->address;
+        $this->shopPhone = $this->shopProfile->phone;
+        $this->shopEmail = $this->shopProfile->email;
+        $this->shopInstagram = $this->shopProfile->instagram;
+        $this->shopFacebook = $this->shopProfile->facebook;
+        $this->shopTiktok = $this->shopProfile->tiktok;
 
         // Cashier Settings
         $this->currency = $this->settings->currency;
         $this->currencySymbol = $this->settings->currency_symbol;
         $this->taxEnabled = $this->settings->tax_enabled;
-        $this->taxRate = $this->settings->tax_rate * 100; // Convert to percentage
+        $this->taxRate = $this->settings->tax_rate * 100;
         $this->taxLabel = $this->settings->tax_label;
         $this->serviceChargeEnabled = $this->settings->service_charge_enabled;
-        $this->serviceChargeRate = $this->settings->service_charge_rate * 100; // Convert to percentage
+        $this->serviceChargeRate = $this->settings->service_charge_rate * 100;
 
         // Landing Page Settings
-        $this->landingDescription = $this->settings->landing_description;
-        $this->operatingHours = $this->settings->operating_hours;
-        $this->operatingDays = $this->settings->operating_days;
-        $this->googleMapsUrl = $this->settings->google_maps_url;
+        $this->landingDescription = $this->shopProfile->landing_description;
+        $this->operatingHours = $this->shopProfile->operating_hours;
+        $this->operatingDays = $this->shopProfile->operating_days;
+        $this->googleMapsUrl = $this->shopProfile->google_maps_url;
 
         // System Settings
         $this->timezone = $this->settings->timezone;
@@ -115,36 +120,38 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
     }
 
     public function save(
+        ShopProfileService $shopProfileService,
         ApplicationSettingService $applicationSettingService,
     ): void {
         $this->validate();
 
         try {
-            $data = [
-                "shop_name" => $this->shopName,
-                "shop_address" => $this->shopAddress,
-                "shop_phone" => $this->shopPhone,
-                "shop_email" => $this->shopEmail,
-                "shop_instagram" => $this->shopInstagram,
-                "shop_facebook" => $this->shopFacebook,
-                "shop_website" => $this->shopWebsite,
-                "currency" => $this->currency,
-                "currency_symbol" => $this->currencySymbol,
-                "tax_enabled" => $this->taxEnabled,
-                "tax_rate" => $this->taxRate / 100, // Convert to decimal
-                "tax_label" => $this->taxLabel,
-                "service_charge_enabled" => $this->serviceChargeEnabled,
-                "service_charge_rate" => $this->serviceChargeRate / 100, // Convert to decimal
+            $shopProfileService->updateShopProfile([
+                "name" => $this->shopName,
+                "logo" => $this->shopLogo,
+                "address" => $this->shopAddress,
+                "phone" => $this->shopPhone,
+                "email" => $this->shopEmail,
+                "instagram" => $this->shopInstagram,
+                "facebook" => $this->shopFacebook,
+                "tiktok" => $this->shopTiktok,
                 "landing_description" => $this->landingDescription,
                 "operating_hours" => $this->operatingHours,
                 "operating_days" => $this->operatingDays,
                 "google_maps_url" => $this->googleMapsUrl,
+            ]);
+            $applicationSettingService->updateSettings([
+                "currency" => $this->currency,
+                "currency_symbol" => $this->currencySymbol,
+                "tax_enabled" => $this->taxEnabled,
+                "tax_rate" => $this->taxRate / 100,
+                "tax_label" => $this->taxLabel,
+                "service_charge_enabled" => $this->serviceChargeEnabled,
+                "service_charge_rate" => $this->serviceChargeRate / 100,
                 "timezone" => $this->timezone,
                 "date_format" => $this->dateFormat,
                 "time_format" => $this->timeFormat,
-            ];
-
-            $applicationSettingService->updateSettings($data);
+            ]);
 
             session()->flash("success", "Pengaturan berhasil disimpan!");
         } catch (\Exception $e) {
@@ -159,7 +166,7 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
         ApplicationSettingService $applicationSettingService,
     ): void {
         $this->settings = $applicationSettingService->getSettings();
-        $this->loadSettings();
+        $this->loadData();
         session()->flash("success", "Form berhasil direset!");
     }
 
@@ -214,10 +221,18 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
         </button>
         <button
             wire:click="save"
+            wire:loading.attr="disabled"
+            wire:target="save"
             class="px-6 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2"
         >
-            <i class="ri-save-line"></i>
-            Simpan Perubahan
+            <i class="ri-save-line" wire:loading.remove wire:target="save"></i>
+            <i
+                class="ri-loader-4-line animate-spin"
+                wire:loading
+                wire:target="save"
+            ></i>
+            <span wire:loading.remove wire:target="save">Simpan Perubahan</span>
+            <span wire:loading wire:target="save">Menyimpan...</span>
         </button>
     </div>
 
@@ -366,15 +381,15 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="ri-global-line text-gray-500"></i>
-                        Website
+                        Tiktok
                     </label>
                     <input
-                        type="url"
-                        class="block w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition-colors @error("shopWebsite") border-red-500 @enderror"
-                        wire:model="shopWebsite"
+                        type="text"
+                        class="block w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition-colors @error("shopTiktok") border-red-500 @enderror"
+                        wire:model="shopTiktok"
                         placeholder="https://www.qiocoffee.com"
                     />
-                    @error("shopWebsite")
+                    @error("shopTiktok")
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>

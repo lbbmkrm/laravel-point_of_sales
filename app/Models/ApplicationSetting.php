@@ -9,14 +9,6 @@ class ApplicationSetting extends Model
     protected $table = 'application_settings';
 
     protected $fillable = [
-        'shop_name',
-        'shop_logo',
-        'shop_address',
-        'shop_phone',
-        'shop_email',
-        'shop_instagram',
-        'shop_facebook',
-        'shop_website',
         'currency',
         'currency_symbol',
         'tax_enabled',
@@ -24,10 +16,6 @@ class ApplicationSetting extends Model
         'tax_label',
         'service_charge_enabled',
         'service_charge_rate',
-        'landing_description',
-        'operating_hours',
-        'operating_days',
-        'google_maps_url',
         'timezone',
         'date_format',
         'time_format',
