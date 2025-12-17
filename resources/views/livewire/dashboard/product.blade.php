@@ -8,8 +8,10 @@ use Livewire\Volt\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 new #[Title("Products")] class extends Component {
+    use WithFileUploads;
     public Collection $products;
     public Collection $categories;
 
@@ -21,6 +23,8 @@ new #[Title("Products")] class extends Component {
 
     // Form fields
     public string $name = "";
+    public $image;
+    public $existingImage;
     public ?int $price = null;
     public string $description = "";
     public ?int $category_id = null;
@@ -36,6 +40,7 @@ new #[Title("Products")] class extends Component {
                 "integer",
                 Rule::exists("categories", "id"),
             ],
+            "image" => ["nullable", "image", "max:2048"],
         ];
     }
 
@@ -66,6 +71,7 @@ new #[Title("Products")] class extends Component {
         $this->price = $product->price;
         $this->description = $product->description ?? "";
         $this->category_id = $product->category_id;
+        $this->existingImage = $product->image;
 
         $this->showModal = true;
     }
@@ -74,6 +80,19 @@ new #[Title("Products")] class extends Component {
     {
         try {
             $validated = $this->validate();
+
+            if ($this->image) {
+                if ($this->isEditMode && $this->existingImage) {
+                    \Storage::delete($this->existingImage);
+                }
+
+                $path = $this->image->store("products", "public");
+                $validated["image"] = $path;
+            }
+
+            if ($this->isEditMode && ! $this->image) {
+                $validated["image"] = $this->existingImage;
+            }
 
             if ($this->isEditMode) {
                 $productService->updateProduct(
@@ -153,7 +172,13 @@ new #[Title("Products")] class extends Component {
             "category_id",
             "editingProduct",
             "isEditMode",
+            "image",
+            "existingImage",
         ]);
+
+        if ($this->categories && $this->categories->count() > 0) {
+            $this->category_id = $this->categories->first()->id;
+        }
     }
 };
 ?>
@@ -295,7 +320,7 @@ new #[Title("Products")] class extends Component {
         </table>
     </div>
 
-    {{-- Modal Tambah/Edit Produk (Modern 2-Kolom) --}}
+    {{-- Modal Tambah/Edit Produk --}}
     <div
         x-data
         x-show="$wire.showModal"
@@ -310,7 +335,7 @@ new #[Title("Products")] class extends Component {
         x-transition:leave-end="opacity-0"
     >
         <div
-            class="w-full h-full max-w-3xl bg-white rounded-2xl shadow-2xl p-8"
+            class="w-full h-full max-w-3xl bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -347,6 +372,153 @@ new #[Title("Products")] class extends Component {
                 wire:submit.prevent="save"
                 class="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
+                <!-- Gambar Produk (Full Width) -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Gambar Produk
+                    </label>
+                    <div class="flex items-start gap-4">
+                        <!-- Preview Gambar -->
+                        <div class="flex-shrink-0">
+                            @if ($image)
+                                <div
+                                    class="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-amber-500"
+                                >
+                                    <img
+                                        src="{{ $image->temporaryUrl() }}"
+                                        alt="Preview"
+                                        class="w-full h-full object-cover"
+                                    />
+                                    <button
+                                        type="button"
+                                        wire:click="$set('image', null)"
+                                        class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12"
+                                            ></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            @elseif ($existingImage)
+                                <div
+                                    class="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-300"
+                                >
+                                    <img
+                                        src="{{ Storage::url($existingImage) }}"
+                                        alt="Preview"
+                                        class="w-full h-full object-cover"
+                                    />
+                                    <p>{{ Storage::url($existingImage) }}</p>
+                                </div>
+                            @else
+                                <div
+                                    class="w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50"
+                                >
+                                    <svg
+                                        class="w-12 h-12 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        ></path>
+                                    </svg>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Upload Button -->
+                        <div class="flex-1">
+                            <label class="cursor-pointer">
+                                <div
+                                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-amber-500 transition"
+                                >
+                                    <div class="flex flex-col items-center">
+                                        <svg
+                                            class="w-10 h-10 text-gray-400 mb-2"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                            ></path>
+                                        </svg>
+                                        <span
+                                            class="text-sm text-gray-600 mb-1"
+                                        >
+                                            <span
+                                                class="text-amber-600 font-medium"
+                                            >
+                                                Klik untuk upload
+                                            </span>
+                                            atau drag & drop
+                                        </span>
+                                        <span class="text-xs text-gray-500">
+                                            PNG, JPG, JPEG (Max. 2MB)
+                                        </span>
+                                    </div>
+                                </div>
+                                <input
+                                    type="file"
+                                    wire:model="image"
+                                    accept="image/png,image/jpeg,image/jpg"
+                                    class="hidden"
+                                />
+                            </label>
+
+                            <!-- Loading Indicator -->
+                            <div wire:loading wire:target="image" class="mt-2">
+                                <div
+                                    class="flex items-center text-sm text-amber-600"
+                                >
+                                    <svg
+                                        class="animate-spin h-4 w-4 mr-2"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            class="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            stroke-width="4"
+                                        ></circle>
+                                        <path
+                                            class="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
+                                    </svg>
+                                    Mengupload gambar...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @error("image")
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Nama Produk -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -446,7 +618,6 @@ new #[Title("Products")] class extends Component {
                         <select
                             wire:model="category_id"
                             class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition appearance-none"
-                            required
                         >
                             <option value="" disabled>Pilih kategori</option>
                             @foreach ($categories as $category)
