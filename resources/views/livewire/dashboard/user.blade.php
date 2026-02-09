@@ -5,8 +5,6 @@ use App\Services\UserService;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Volt\Component;
 use Livewire\Attributes\{Layout, Title};
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Auth;
 
 new #[Layout("layouts.app")] #[Title("Users")] class extends Component {
     public Collection $users;
@@ -17,7 +15,7 @@ new #[Layout("layouts.app")] #[Title("Users")] class extends Component {
     public ?User $userToDelete = null;
     public ?User $editingUser = null;
 
-    // Form fields (sama seperti Product)
+    // Form fields
     public string $name = "";
     public string $username = "";
     public string $phone = "";
@@ -48,7 +46,6 @@ new #[Layout("layouts.app")] #[Title("Users")] class extends Component {
 
     public function mount(UserService $userService): void
     {
-        Gate::authorize("view-users", Auth::user());
         $this->users = $userService->getAllUsers();
     }
 

@@ -2,12 +2,14 @@
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\{Layout, Title, Validate};
+use Livewire\WithFileUploads;
 use App\Models\ApplicationSetting;
 use App\Services\ApplicationSettingService;
 use App\Models\ShopProfile;
 use App\Services\ShopProfileService;
 
 new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
+    use WithFileUploads;
     protected ?ApplicationSetting $settings = null;
     protected ?ShopProfile $shopProfile = null;
 
@@ -16,6 +18,9 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
     public ?string $shopName = null;
 
     public ?string $shopLogo = null;
+
+    #[Validate("nullable|image|max:10240")]
+    public $logoFile = null;
 
     #[Validate("required|string")]
     public ?string $shopAddress = null;
@@ -90,6 +95,7 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
 
         // Shop Information
         $this->shopLogo = $this->shopProfile->logo;
+        $this->logoFile = null;
         $this->shopName = $this->shopProfile->name;
         $this->shopAddress = $this->shopProfile->address;
         $this->shopPhone = $this->shopProfile->phone;
@@ -126,6 +132,9 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
         $this->validate();
 
         try {
+            if ($this->logoFile) {
+                $this->shopLogo = $this->logoFile->store("logos", "public");
+            }
             $shopProfileService->updateShopProfile([
                 "name" => $this->shopName,
                 "logo" => $this->shopLogo,
@@ -252,31 +261,69 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     Logo Toko
                 </label>
-                <div class="flex items-center gap-4">
-                    <div
-                        class="w-24 h-24 rounded-xl border-2 border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden"
-                    >
-                        <svg
-                            class="w-12 h-12 text-gray-400"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
+                <div class="flex items-center gap-6">
+                    <!-- Preview Logo -->
+                    <div class="relative group">
+                        <div
+                            class="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden transition-all group-hover:border-amber-500"
                         >
-                            <path
-                                d="M18.5 2c1.38 0 2.5 1.12 2.5 2.5V6h-3V4.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5V6h-3V4.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5V6H8V4.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5V6H4V4.5C4 3.12 5.12 2 6.5 2h12zM4 19c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8H4v11zm8-9c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"
-                            />
-                        </svg>
+                            @if ($logoFile)
+                                <img
+                                    src="{{ $logoFile->temporaryUrl() }}"
+                                    class="w-full h-full object-cover"
+                                />
+                            @elseif ($shopLogo)
+                                <img
+                                    src="{{ asset("storage/" . $shopLogo) }}"
+                                    class="w-full h-full object-cover"
+                                />
+                            @else
+                                <i
+                                    class="ri-image-add-line text-3xl text-gray-400"
+                                ></i>
+                            @endif
+                        </div>
+
+                        <!-- Loading Overlay -->
+                        <div
+                            wire:loading
+                            wire:target="logoFile"
+                            class="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl"
+                        >
+                            <i
+                                class="ri-loader-4-line animate-spin text-amber-500 text-2xl"
+                            ></i>
+                        </div>
                     </div>
+
                     <div class="flex-1">
-                        <button
-                            class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm"
-                            disabled
+                        <div class="relative">
+                            <input
+                                type="file"
+                                id="logo-upload"
+                                wire:model="logoFile"
+                                class="hidden"
+                                accept="image/*"
+                            />
+                            <label
+                                for="logo-upload"
+                                class="px-5 py-2.5 bg-amber-500 text-white rounded-xl shadow-lg shadow-amber-500/30 hover:bg-amber-600 transition-all cursor-pointer inline-flex items-center gap-2 font-medium"
+                            >
+                                <i class="ri-upload-2-line"></i>
+                                Pilih Logo Baru
+                            </label>
+                        </div>
+                        @error("logoFile")
+                            <p class="text-red-500 text-xs mt-2 font-medium">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        <p
+                            class="text-xs text-gray-500 mt-3 flex items-center gap-1"
                         >
-                            <i class="ri-upload-2-line mr-1"></i>
-                            Upload Logo
-                        </button>
-                        <p class="text-xs text-gray-500 mt-2">
-                            <i class="ri-information-line"></i>
-                            Format: JPG, PNG (Max 2MB, Rekomendasi: 512x512px)
+                            <i class="ri-information-line text-amber-500"></i>
+                            PNG, JPG atau WEBP (Maksimal 2MB)
                         </p>
                     </div>
                 </div>

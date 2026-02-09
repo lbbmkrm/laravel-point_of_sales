@@ -5,9 +5,7 @@ use Livewire\Attributes\{Layout, Title, Computed};
 use App\Services\ReportService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Gate;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Auth;
 
 new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
     public string $startDate = "";
@@ -17,9 +15,6 @@ new #[Layout("layouts.app")] #[Title("Reports")] class extends Component {
 
     public function mount(ReportService $reportService)
     {
-        if (Gate::denies("view-report", Auth::user())) {
-            abort(403);
-        }
         $this->startDate = Carbon::now()
             ->startOfMonth()
             ->format("Y-m-d");

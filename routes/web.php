@@ -13,7 +13,11 @@ Route::middleware('auth')->group(function () {
     Volt::route('/dashboard', 'dashboard.home')->name('dashboard');
     Volt::route('/products', 'dashboard.product')->name('products');
     Volt::route('/cashier', 'dashboard.cashier')->name('cashier');
-    Volt::route('/reports', 'dashboard.report')->name('reports');
-    Volt::route('/users', 'dashboard.user')->name('users');
-    Volt::route('/settings', 'dashboard.settings')->name('settings');
+
+    // Owner only routes
+    Route::middleware('role:owner')->group(function () {
+        Volt::route('/reports', 'dashboard.report')->name('reports');
+        Volt::route('/users', 'dashboard.user')->name('users');
+        Volt::route('/settings', 'dashboard.settings')->name('settings');
+    });
 });

@@ -28,7 +28,7 @@ return new class extends Migration
             $table->text('landing_description')->nullable();
             $table->string('operating_hours')->default('00:00 - 00:00');
             $table->string('operating_days')->default('Day, - Day');
-            $table->string('google_maps_url')->nullable();
+            $table->text('google_maps_url')->nullable();
 
             $table->timestamps();
         });
