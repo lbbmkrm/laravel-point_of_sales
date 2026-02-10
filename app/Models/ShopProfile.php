@@ -22,5 +22,7 @@ class ShopProfile extends Model
         'operating_hours',
         'operating_days',
         'google_maps_url',
+        'google_rating',
+        'years_experience',
     ];
 }

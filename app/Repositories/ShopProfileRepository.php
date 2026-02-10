@@ -42,7 +42,8 @@ class ShopProfileRepository
                     'operating_hours' => '07:00 - 22:00',
                     'operating_days' => 'Senin - Minggu',
                     'google_maps_url' => 'https://maps.google.com/?q=QIA+Rongku+Coffee+Medan',
-
+                    'google_rating' => 4.9,
+                    'years_experience' => 3,
                 ]
             );
         } catch (Exception $e) {

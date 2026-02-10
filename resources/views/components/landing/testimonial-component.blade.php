@@ -1,5 +1,7 @@
 @props([
     "shopProfile",
+    "testimonials",
+    "stats",
 ])
 
 <section
@@ -24,64 +26,36 @@
         <div
             x-data="{
                 currentSlide: 0,
-                testimonials: [
-                    {
-                        name: 'Riska Pratiwi',
-                        role: 'Content Creator',
-                        image: 'https://i.pravatar.cc/150?img=5',
-                        rating: 5,
-                        text: 'Qio Coffee adalah tempat favorit saya untuk bekerja! Kopinya enak, WiFi cepat, dan suasananya sangat nyaman. Cappuccino mereka adalah yang terbaik yang pernah saya coba di Medan.',
-                        date: '2 minggu yang lalu',
-                    },
-                    {
-                        name: 'Andi Wijaya',
-                        role: 'Entrepreneur',
-                        image: 'https://i.pravatar.cc/150?img=12',
-                        rating: 5,
-                        text: 'Sebagai penikmat kopi, saya sangat puas dengan kualitas biji kopi yang digunakan. Pour Over mereka benar-benar memunculkan karakter kopi yang kompleks. Highly recommended!',
-                        date: '1 bulan yang lalu',
-                    },
-                    {
-                        name: 'Sarah Melinda',
-                        role: 'Marketing Manager',
-                        image: 'https://i.pravatar.cc/150?img=9',
-                        rating: 5,
-                        text: 'Tempat yang sempurna untuk meeting dengan klien atau sekadar me-time. Pelayanan ramah, menu beragam, dan harga sangat reasonable. Cheesecake-nya juga juara!',
-                        date: '3 minggu yang lalu',
-                    },
-                    {
-                        name: 'Budi Santoso',
-                        role: 'Software Developer',
-                        image: 'https://i.pravatar.cc/150?img=14',
-                        rating: 5,
-                        text: 'Sudah langganan di sini hampir setahun. Iced Americano mereka selalu konsisten rasanya. Barista-nya juga friendly dan profesional. Sukses terus Qio Coffee!',
-                        date: '1 minggu yang lalu',
-                    },
-                    {
-                        name: 'Dian Kusuma',
-                        role: 'Graphic Designer',
-                        image: 'https://i.pravatar.cc/150?img=20',
-                        rating: 5,
-                        text: 'Ambiance-nya cozy banget! Instagram-able dan cocok buat foto-foto. Yang paling saya suka adalah Matcha Latte mereka yang creamy dan tidak terlalu manis. Perfect!',
-                        date: '2 bulan yang lalu',
-                    },
-                ],
+                testimonials: @js($testimonials->map(
+                            fn ($t) => [
+                                "name" => $t->client_name,
+                                "role" => $t->client_role,
+                                "image" => $t->client_image,
+                                "rating" => $t->rating,
+                                "text" => $t->testimonial_text,
+                                "date" => $t->created_at->diffForHumans(),
+                            ],
+                        )),
                 autoplay: null,
                 init() {
                     this.startAutoplay()
                 },
                 startAutoplay() {
-                    this.autoplay = setInterval(() => {
-                        this.next()
-                    }, 5000)
+                    if (this.testimonials.length > 1) {
+                        this.autoplay = setInterval(() => {
+                            this.next()
+                        }, 5000)
+                    }
                 },
                 stopAutoplay() {
                     clearInterval(this.autoplay)
                 },
                 next() {
+                    if (this.testimonials.length === 0) return
                     this.currentSlide = (this.currentSlide + 1) % this.testimonials.length
                 },
                 prev() {
+                    if (this.testimonials.length === 0) return
                     this.currentSlide =
                         this.currentSlide === 0
                             ? this.testimonials.length - 1
@@ -232,10 +206,12 @@
             <div
                 class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
             >
-                <div class="text-4xl font-bold text-amber-600 mb-2">4.9</div>
+                <div class="text-4xl font-bold text-amber-600 mb-2">
+                    {{ $stats["google_rating"] }}
+                </div>
                 <div class="text-gray-600 font-medium">Rating Google</div>
                 <div class="flex justify-center mt-2">
-                    <template x-for="star in 5">
+                    @for ($i = 0; $i < floor($stats['google_rating']); $i++)
                         <svg
                             class="w-4 h-4 text-amber-500"
                             fill="currentColor"
@@ -245,28 +221,34 @@
                                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
                             />
                         </svg>
-                    </template>
+                    @endfor
                 </div>
             </div>
 
             <div
                 class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
             >
-                <div class="text-4xl font-bold text-amber-600 mb-2">500+</div>
+                <div class="text-4xl font-bold text-amber-600 mb-2">
+                    {{ $stats["happy_customers"] }}
+                </div>
                 <div class="text-gray-600 font-medium">Happy Customers</div>
             </div>
 
             <div
                 class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
             >
-                <div class="text-4xl font-bold text-amber-600 mb-2">2K+</div>
+                <div class="text-4xl font-bold text-amber-600 mb-2">
+                    {{ $stats["cups_served"] }}
+                </div>
                 <div class="text-gray-600 font-medium">Cups Served</div>
             </div>
 
             <div
                 class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
             >
-                <div class="text-4xl font-bold text-amber-600 mb-2">3+</div>
+                <div class="text-4xl font-bold text-amber-600 mb-2">
+                    {{ $stats["years_experience"] }}+
+                </div>
                 <div class="text-gray-600 font-medium">Years Experience</div>
             </div>
         </div>

@@ -73,6 +73,12 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
     #[Validate("nullable|url")]
     public ?string $googleMapsUrl = null;
 
+    #[Validate("required|numeric|min:0|max:5")]
+    public float $googleRating = 4.9;
+
+    #[Validate("required|integer|min:0")]
+    public int $yearsExperience = 3;
+
     // System Settings
     public string $timezone = "Asia/Jakarta";
     public string $dateFormat = "d/m/Y";
@@ -118,6 +124,10 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
         $this->operatingHours = $this->shopProfile->operating_hours;
         $this->operatingDays = $this->shopProfile->operating_days;
         $this->googleMapsUrl = $this->shopProfile->google_maps_url;
+        $this->googleRating =
+            (float) ($this->shopProfile->google_rating ?? 4.9);
+        $this->yearsExperience =
+            (int) ($this->shopProfile->years_experience ?? 3);
 
         // System Settings
         $this->timezone = $this->settings->timezone;
@@ -148,6 +158,8 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
                 "operating_hours" => $this->operatingHours,
                 "operating_days" => $this->operatingDays,
                 "google_maps_url" => $this->googleMapsUrl,
+                "google_rating" => $this->googleRating,
+                "years_experience" => $this->yearsExperience,
             ]);
             $applicationSettingService->updateSettings([
                 "currency" => $this->currency,
@@ -683,6 +695,40 @@ new #[Layout("layouts.app")] #[Title("Settings")] class extends Component {
                         placeholder="Senin - Minggu"
                     />
                     @error("operatingDays")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="ri-star-line text-gray-500"></i>
+                        Rating Google
+                    </label>
+                    <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="5"
+                        class="block w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition-colors @error("googleRating") border-red-500 @enderror"
+                        wire:model="googleRating"
+                    />
+                    @error("googleRating")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="ri-history-line text-gray-500"></i>
+                        Tahun Pengalaman
+                    </label>
+                    <input
+                        type="number"
+                        class="block w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition-colors @error("yearsExperience") border-red-500 @enderror"
+                        wire:model="yearsExperience"
+                    />
+                    @error("yearsExperience")
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>

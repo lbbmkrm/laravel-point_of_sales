@@ -122,6 +122,18 @@ new class extends Component {
                 @if (auth()->user()->isOwner())
                     <li>
                         <a
+                            href="{{ route("testimonials") }}"
+                            wire:navigate
+                            class="flex items-center p-2 rounded-lg group transition-colors duration-200 {{ $this->isActiveRoute("testimonials") ? "bg-amber-50 text-amber-700" : "text-gray-900 hover:bg-gray-100" }}"
+                        >
+                            <i
+                                class="ri-chat-quote-line text-xl transition duration-75 {{ $this->isActiveRoute("testimonials") ? "text-amber-600" : "text-gray-500 group-hover:text-gray-900" }}"
+                            ></i>
+                            <span class="ms-3">Testimoni</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
                             href="{{ route("users") }}"
                             wire:navigate
                             class="flex items-center p-2 rounded-lg group transition-colors duration-200 {{ $this->isActiveRoute("users") ? "bg-amber-50 text-amber-700" : "text-gray-900 hover:bg-gray-100" }}"

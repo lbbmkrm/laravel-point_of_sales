@@ -18,6 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:owner')->group(function () {
         Volt::route('/reports', 'dashboard.report')->name('reports');
         Volt::route('/users', 'dashboard.user')->name('users');
+        Volt::route('/testimonials', 'dashboard.testimonial')->name('testimonials');
         Volt::route('/settings', 'dashboard.settings')->name('settings');
     });
 });
