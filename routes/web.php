@@ -20,5 +20,6 @@ Route::middleware('auth')->group(function () {
         Volt::route('/users', 'dashboard.user')->name('users');
         Volt::route('/testimonials', 'dashboard.testimonial')->name('testimonials');
         Volt::route('/settings', 'dashboard.settings')->name('settings');
+        Volt::route('/galleries', 'dashboard.gallery')->name('galleries');
     });
 });

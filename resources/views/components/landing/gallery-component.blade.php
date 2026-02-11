@@ -1,5 +1,6 @@
 @props([
     "shopProfile",
+    "galleries",
 ])
 
 <section id="gallery" class="py-20 px-8 bg-white">
@@ -17,119 +18,34 @@
         </div>
 
         <!-- Gallery Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Gallery Item 1 - Large -->
-            <div
-                class="relative overflow-hidden rounded-lg shadow-lg lg:col-span-2 lg:row-span-2 group"
-            >
-                <img
-                    src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800"
-                    alt="Coffee Shop Interior"
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+        <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[250px]"
+        >
+            @foreach ($galleries as $gallery)
                 <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6"
+                    class="relative overflow-hidden rounded-lg shadow-lg group {{ $loop->first ? "lg:col-span-2 lg:row-span-2" : "" }} {{ $loop->index == 3 ? "md:col-span-2" : "" }}"
                 >
-                    <h3 class="text-white text-xl font-semibold">
-                        Interior Qio Coffee
-                    </h3>
-                    <p class="text-gray-200 mt-2">
-                        Suasana nyaman untuk bersantai dan bekerja
-                    </p>
+                    <img
+                        src="{{ $gallery->image_url }}"
+                        alt="{{ $gallery->title }}"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-6"
+                    >
+                        <h3
+                            class="text-white {{ $loop->first ? "text-2xl" : "text-lg" }} font-semibold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
+                        >
+                            {{ $gallery->title }}
+                        </h3>
+                        <p
+                            class="text-gray-200 mt-2 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 line-clamp-2"
+                        >
+                            {{ $gallery->description }}
+                        </p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Gallery Item 2 -->
-            <div class="relative overflow-hidden rounded-lg shadow-lg group">
-                <img
-                    src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600"
-                    alt="Coffee Brewing"
-                    class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6"
-                >
-                    <h3 class="text-white text-lg font-semibold">
-                        Proses Brewing
-                    </h3>
-                    <p class="text-gray-200 mt-2">Seni menyeduh kopi</p>
-                </div>
-            </div>
-
-            <!-- Gallery Item 3 -->
-            <div class="relative overflow-hidden rounded-lg shadow-lg group">
-                <img
-                    src="https://images.unsplash.com/photo-1511081692775-05d0f180a065?w=600"
-                    alt="Coffee Beans"
-                    class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6"
-                >
-                    <h3 class="text-white text-lg font-semibold">
-                        Biji Kopi Pilihan
-                    </h3>
-                    <p class="text-gray-200 mt-2">
-                        Kualitas terbaik dari petani lokal
-                    </p>
-                </div>
-            </div>
-
-            <!-- Gallery Item 4 -->
-            <div class="relative overflow-hidden rounded-lg shadow-lg group">
-                <img
-                    src="https://images.unsplash.com/photo-1513267048331-5611cad62e41?w=600"
-                    alt="Coffee Art"
-                    class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6"
-                >
-                    <h3 class="text-white text-lg font-semibold">Latte Art</h3>
-                    <p class="text-gray-200 mt-2">
-                        Kreasi seni di setiap cangkir
-                    </p>
-                </div>
-            </div>
-
-            <!-- Gallery Item 5 -->
-            <div class="relative overflow-hidden rounded-lg shadow-lg group">
-                <img
-                    src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600"
-                    alt="Coffee Shop Event"
-                    class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6"
-                >
-                    <h3 class="text-white text-lg font-semibold">
-                        Event Spesial
-                    </h3>
-                    <p class="text-gray-200 mt-2">
-                        Workshop dan gathering komunitas
-                    </p>
-                </div>
-            </div>
-
-            <!-- Gallery Item 6 -->
-            <div class="relative overflow-hidden rounded-lg shadow-lg group">
-                <img
-                    src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=600"
-                    alt="Coffee and Dessert"
-                    loading="lazy"
-                    class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6"
-                >
-                    <h3 class="text-white text-lg font-semibold">
-                        Dessert Spesial
-                    </h3>
-                    <p class="text-gray-200 mt-2">
-                        Pendamping sempurna untuk kopi Anda
-                    </p>
-                </div>
-            </div>
+            @endforeach
         </div>
 
         <!-- Instagram Link -->

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ShopProfile;
+use App\Models\Gallery;
 use App\Services\ShopProfileService;
 use App\Services\ProductService;
 use App\Services\CategoryService;
@@ -13,6 +14,7 @@ new #[Layout("layouts.landing")] class extends Component {
     public Collection $products;
     public Collection $categories;
     public Collection $testimonials;
+    public Collection $galleries;
     public array $stats = [];
     public ?string $selectedCategory = null;
 
@@ -44,6 +46,8 @@ new #[Layout("layouts.landing")] class extends Component {
                     : $totalCups,
             "years_experience" => $this->shopProfile->years_experience ?? 3,
         ];
+
+        $this->galleries = Gallery::orderBy("created_at", "desc")->get();
     }
 
     public function filterByCategory(
@@ -82,7 +86,10 @@ new #[Layout("layouts.landing")] class extends Component {
         />
 
         <!-- Gallery Section -->
-        <x-landing.gallery-component :shopProfile="$shopProfile" />
+        <x-landing.gallery-component
+            :shopProfile="$shopProfile"
+            :galleries="$galleries"
+        />
 
         <!-- Contact & Location Section -->
         <x-landing.contact-component :shopProfile="$shopProfile" />

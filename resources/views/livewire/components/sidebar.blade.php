@@ -153,6 +153,19 @@ new class extends Component {
                         </a>
                     </li>
                 @endif
+
+                <li>
+                    <a
+                        href="{{ route("galleries") }}"
+                        wire:navigate
+                        class="flex items-center p-2 rounded-lg group transition-colors duration-200 {{ $this->isActiveRoute("galleries") ? "bg-amber-50 text-amber-700" : "text-gray-900 hover:bg-gray-100" }}"
+                    >
+                        <i
+                            class="ri-image-line text-xl transition duration-75 {{ $this->isActiveRoute("galleries") ? "text-amber-600" : "text-gray-500 group-hover:text-gray-900" }}"
+                        ></i>
+                        <span class="ms-3">Gallery</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </aside>
