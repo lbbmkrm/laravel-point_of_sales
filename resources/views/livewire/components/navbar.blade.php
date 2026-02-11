@@ -59,7 +59,11 @@ new class extends Component {
                     </svg>
                 </button>
 
-                <a href="#" class="flex items-center gap-2.5 group">
+                <a
+                    href="{{ route("dashboard") }}"
+                    wire:navigate
+                    class="flex items-center gap-2.5 group"
+                >
                     <!-- Logo QIA -->
                     <img
                         src="{{ asset("storage/" . $shopProfile->logo) }}"
@@ -129,6 +133,26 @@ new class extends Component {
 
                     <!-- Menu Items -->
                     <div class="py-1">
+                        <a
+                            href="/"
+                            wire:navigate
+                            class="cursor-pointer group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150"
+                        >
+                            <svg
+                                class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                                ></path>
+                            </svg>
+                            Lihat Website
+                        </a>
                         <a
                             href="#"
                             class="cursor-pointer group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150"

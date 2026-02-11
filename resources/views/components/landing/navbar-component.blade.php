@@ -85,26 +85,26 @@
             </div>
 
             <!-- CTA Button Desktop -->
-            <div class="hidden md:flex items-center space-x-4">
-                <a
-                    href="#menu"
-                    class="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
-                >
-                    <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+            <div class="hidden md:flex items-center">
+                @auth
+                    <a
+                        href="{{ route("dashboard") }}"
+                        wire:navigate
+                        class="px-8 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                        ></path>
-                    </svg>
-                    <span>Order Now</span>
-                </a>
+                        <i class="ri-dashboard-line text-lg"></i>
+                        <span>Dashboard</span>
+                    </a>
+                @else
+                    <a
+                        href="{{ route("login") }}"
+                        wire:navigate
+                        class="px-8 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
+                    >
+                        <i class="ri-user-settings-line text-lg"></i>
+                        <span>Login</span>
+                    </a>
+                @endauth
             </div>
 
             <!-- Mobile Menu Button -->
@@ -179,15 +179,24 @@
             >
                 Kontak
             </a>
-            <div class="pt-4">
+
+            @auth
                 <a
-                    href="#menu"
-                    @click="isOpen = false"
-                    class="block w-full px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-full transition-all duration-300 text-center shadow-lg"
+                    href="{{ route("dashboard") }}"
+                    wire:navigate
+                    class="block px-4 py-3 text-white hover:text-amber-500 hover:bg-white/5 rounded-lg transition-all duration-200 font-medium"
                 >
-                    Order Now
+                    Dashboard
                 </a>
-            </div>
+            @else
+                <a
+                    href="{{ route("login") }}"
+                    wire:navigate
+                    class="block px-4 py-3 text-white hover:text-amber-500 hover:bg-white/5 rounded-lg transition-all duration-200 font-medium"
+                >
+                    Login
+                </a>
+            @endauth
         </div>
     </div>
 </nav>
