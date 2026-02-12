@@ -28,6 +28,7 @@
                     <img
                         src="{{ $gallery->image_url }}"
                         alt="{{ $gallery->title }}"
+                        loading="lazy"
                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div

@@ -71,6 +71,18 @@ new class extends Component {
                         <span class="ms-3">Kasir</span>
                     </a>
                 </li>
+                <li>
+                    <a
+                        href="{{ route("history") }}"
+                        wire:navigate
+                        class="flex items-center p-2 rounded-lg group transition-colors duration-200 {{ $this->isActiveRoute("history") ? "bg-amber-50 text-amber-700" : "text-gray-900 hover:bg-gray-100" }}"
+                    >
+                        <i
+                            class="ri-history-line text-xl transition duration-75 {{ $this->isActiveRoute("history") ? "text-amber-600" : "text-gray-500 group-hover:text-gray-900" }}"
+                        ></i>
+                        <span class="ms-3">Riwayat</span>
+                    </a>
+                </li>
                 @if (auth()->user()->isOwner())
                     <li>
                         <a
