@@ -1,74 +1,54 @@
 # Daftar Rute Aplikasi (Endpoints) - Sistem POS QIO Coffee
 
-Dokumen ini menjelaskan rute-rute utama aplikasi. Karena menggunakan TALL Stack, sebagian besar interaksi dinamis tidak diekspos sebagai endpoint API publik, melainkan sebagai aksi di dalam komponen Livewire yang dipanggil dari halaman utama.
+Dokumen ini menjelaskan rute-rute utama aplikasi QIO Coffee. Aplikasi ini menggunakan **TALL Stack** (Tailwind, Alpine.js, Laravel, Livewire) dengan konsep **Volt** (Single File Livewire Components).
 
 ---
 
 ## 1. Rute Publik (Guest)
 
-Rute ini dapat diakses oleh siapa saja tanpa perlu login.
+Rute yang dapat diakses tanpa login.
 
-| Method | URI         | Controller / View            | Keterangan                                       |
-| :----- | :---------- | :--------------------------- | :----------------------------------------------- |
-| `GET`  | `/`         | `LandingPageController@index`  | Menampilkan halaman utama/landing page QIO Coffee. |
-
----
-
-## 2. Rute Autentikasi
-
-Rute ini digunakan untuk proses login dan logout. Biasanya ditangani oleh package seperti Laravel Breeze/Jetstream.
-
-| Method | URI         | Controller / View            | Keterangan                                       |
-| :----- | :---------- | :--------------------------- | :----------------------------------------------- |
-| `GET`  | `/login`    | `LoginController@show`       | Menampilkan halaman login.                       |
-| `POST` | `/login`    | `LoginController@store`      | Memproses permintaan login dari pengguna.        |
-| `POST` | `/logout`   | `LoginController@destroy`    | Memproses permintaan logout.                     |
+| Method | URI      | Component / Name         | Keterangan                                                    |
+| :----- | :------- | :----------------------- | :------------------------------------------------------------ |
+| `GET`  | `/`      | `landing.index` (`home`) | Halaman Landing Page (Hero, About, Menu, Gallery, Testimoni). |
+| `GET`  | `/login` | `auth.login` (`login`)   | Halaman Login.                                                |
 
 ---
 
-## 3. Rute Aplikasi Internal (Perlu Login)
+## 2. Rute Aplikasi Internal (Perlu Login)
 
-Rute ini hanya bisa diakses setelah pengguna login dan dilindungi oleh *middleware* `auth`.
+Semua rute di bawah ini dilindungi oleh middleware `auth`.
 
-### a. Halaman Utama / Kasir
+### a. Dashboard & Kasir
 
-| Method | URI         | Livewire Component Muatan    | Keterangan                                       |
-| :----- | :---------- | :--------------------------- | :----------------------------------------------- |
-| `GET`  | `/dashboard`| `CashierInterface`           | Halaman utama setelah login, antarmuka kasir.    |
-
-**Aksi di dalam Komponen `CashierInterface`:**
-- `addToCart($productId)`: Menambahkan produk ke keranjang.
-- `removeItem($cartItemId)`: Menghapus item dari keranjang.
-- `clearCart()`: Mengosongkan keranjang.
-- `submitTransaction()`: Menyimpan transaksi ke database.
-
-### b. Halaman Manajemen Produk
-
-| Method | URI         | Livewire Component Muatan    | Keterangan                                       |
-| :----- | :---------- | :--------------------------- | :----------------------------------------------- |
-| `GET`  | `/products` | `ProductManagement`          | Halaman untuk mengelola (CRUD) semua produk.     |
-
-**Aksi di dalam Komponen `ProductManagement`:**
-- `create()`: Menampilkan modal/form untuk menambah produk baru.
-- `store()`: Menyimpan produk baru ke database.
-- `edit($productId)`: Menampilkan modal/form untuk mengedit produk.
-- `update($productId)`: Memperbarui data produk di database.
-- `delete($productId)`: Menghapus produk dari database.
-
-### c. Halaman Laporan
-
-| Method | URI         | Livewire Component Muatan    | Keterangan                                       |
-| :----- | :---------- | :--------------------------- | :----------------------------------------------- |
-| `GET`  | `/reports`  | `ReportDashboard`            | Halaman untuk melihat laporan penjualan.         |
-
-**Aksi di dalam Komponen `ReportDashboard`:**
-- `filterByDate($startDate, $endDate)`: Memfilter laporan berdasarkan rentang tanggal.
+| Method | URI          | Component / Name                 | Keterangan                                              |
+| :----- | :----------- | :------------------------------- | :------------------------------------------------------ |
+| `GET`  | `/dashboard` | `dashboard.home` (`dashboard`)   | Overview statistik ringkas (hanya untuk staff/owner).   |
+| `GET`  | `/cashier`   | `dashboard.cashier` (`cashier`)  | Antarmuka transaksi penjualan (POS).                    |
+| `GET`  | `/history`   | `dashboard.history` (`history`)  | Daftar riwayat transaksi dan detail struk.              |
+| `GET`  | `/products`  | `dashboard.product` (`products`) | Manajemen daftar produk/menu (diatur oleh Gate/Policy). |
 
 ---
 
-### Ringkasan Middleware:
+### b. Rute Khusus Owner (Middleware `role:owner`)
 
--   **`web`**: Berlaku untuk semua rute.
--   **`guest`**: Berlaku untuk rute `/login` (hanya bisa diakses jika belum login).
--   **`auth`**: Berlaku untuk semua rute aplikasi internal (`/dashboard`, `/products`, `/reports`) untuk memastikan hanya pengguna terautentikasi yang bisa mengakses.
--   **`role:owner` (Opsional)**: Middleware kustom bisa dibuat untuk membatasi akses halaman `/products` dan `/reports` hanya untuk pengguna dengan peran `owner`.
+Rute yang hanya dapat diakses oleh pengguna dengan peran `owner`.
+
+| Method | URI             | Component / Name                         | Keterangan                                         |
+| :----- | :-------------- | :--------------------------------------- | :------------------------------------------------- |
+| `GET`  | `/reports`      | `dashboard.report` (`reports`)           | Laporan pendapatan mendalam dan grafik penjualan.  |
+| `GET`  | `/users`        | `dashboard.user` (`users`)               | Manajemen pengguna (Staff/Kasir).                  |
+| `GET`  | `/testimonials` | `dashboard.testimonial` (`testimonials`) | Pengelolaan testimoni yang muncul di landing page. |
+| `GET`  | `/galleries`    | `dashboard.gallery` (`galleries`)        | Manajemen foto galeri untuk landing page.          |
+| `GET`  | `/settings`     | `dashboard.settings` (`settings`)        | Pengaturan aplikasi dan sistem.                    |
+
+---
+
+### Ringkasan Middleware & Keamanan:
+
+- **`auth`**: Memastikan pengguna sudah login.
+- **`guest`**: Mencegah pengguna yang sudah login mengakses halaman login.
+- **`role:owner`**: Membatasi akses menu administratif hanya untuk pemilik.
+- **Laravel Gates/Policies**: Digunakan di dalam komponen (misal pada `dashboard.product`) untuk kontrol akses yang lebih granular pada aksi CRUD.
+- **Global Timezone**: Aplikasi dikonfigurasi menggunakan `Asia/Jakarta` (WIB).
+- **Locale**: Menggunakan `id` (Bahasa Indonesia) untuk format tanggal dan angka.

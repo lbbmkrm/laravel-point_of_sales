@@ -77,7 +77,7 @@ new #[Layout("layouts.app")] #[Title("Transaction History")] class extends
         $query = Transaction::with([
             "user",
             "transactionDetails.product.category",
-        ])->latest();
+        ])->orderBy("created_at", "desc");
 
         if ($this->search) {
             $query->where(function ($q) {
